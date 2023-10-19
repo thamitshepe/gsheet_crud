@@ -10,7 +10,7 @@ scopes = [
 ]
 
 # Load Google Sheets credentials
-creds = ServiceAccountCredentials.from_json_keyfile_name("C:\\Users\\tumel\\OneDrive\\Desktop\\sheety\\data\\secretkey.json", scopes=scopes)
+creds = ServiceAccountCredentials.from_json_keyfile_name("\data\secretkey.json", scopes=scopes)
 
 file = gspread.authorize(creds)
 workbook = file.open("Inventory")
