@@ -26,6 +26,10 @@ def get_credentials():
 # Create 'creds' globally
 creds = get_credentials()
 
+# Check if 'creds' is None
+if creds is None:
+    print("Failed to obtain credentials. Check the JSON key file or the authorization process.")
+else:
 file = gspread.authorize(creds)
 workbook = file.open("Inventory")
 sheet = workbook.sheet1
