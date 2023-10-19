@@ -30,9 +30,9 @@ creds = get_credentials()
 if creds is None:
     print("Failed to obtain credentials. Check the JSON key file or the authorization process.")
 else:
-file = gspread.authorize(creds)
-workbook = file.open("Inventory")
-sheet = workbook.sheet1
+    file = gspread.authorize(creds)
+    workbook = file.open("Inventory")
+    sheet = workbook.sheet1
 
 @app.post("/edit-shoe")
 async def edit_shoe(
