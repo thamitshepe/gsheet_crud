@@ -13,20 +13,18 @@ scopes = [
 # URL of the JSON key file in your GitHub repository
 github_raw_url = 'https://raw.githubusercontent.com/username/repo/main/data/secretkey.json'
 
-# Download the JSON key file from GitHub
-response = requests.get(github_raw_url)
+# Function to download the JSON key file from GitHub and create credentials
+def get_credentials():
+    response = requests.get(github_raw_url)
 
-# Check if the download was successful
-if response.status_code == 200:
-    # Parse the JSON content from the response text
-    json_key = response.json()
+    if response.status_code == 200:
+        json_key = response.json()
+        return service_account.Credentials.from_service_account_info(json_key, scopes=scopes)
+    else:
+        return None
 
-    # Create credentials from the JSON content
-    creds = service_account.Credentials.from_service_account_info(json_key, scopes=scopes)
-
-    # Now you can use 'creds' as your ServiceAccountCredentials
-else:
-    print("Failed to download the JSON key file from GitHub.")
+# Create 'creds' globally
+creds = get_credentials()
 
 file = gspread.authorize(creds)
 workbook = file.open("Inventory")
