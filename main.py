@@ -1,6 +1,7 @@
 from fastapi import FastAPI
 from oauth2client.service_account import ServiceAccountCredentials
 import gspread
+import requests
 
 app = FastAPI()
 
@@ -9,8 +10,23 @@ scopes = [
     'https://www.googleapis.com/auth/drive'
 ]
 
-# Load Google Sheets credentials
-creds = ServiceAccountCredentials.from_json_keyfile_name("\data\secretkey.json", scopes=scopes)
+# URL of the JSON key file in your GitHub repository
+github_raw_url = 'https://raw.githubusercontent.com/username/repo/main/data/secretkey.json'
+
+# Download the JSON key file from GitHub
+response = requests.get(github_raw_url)
+
+# Check if the download was successful
+if response.status_code == 200:
+    # Parse the JSON content from the response text
+    json_key = response.json()
+
+    # Create credentials from the JSON content
+    creds = service_account.Credentials.from_service_account_info(json_key, scopes=scopes)
+
+    # Now you can use 'creds' as your ServiceAccountCredentials
+else:
+    print("Failed to download the JSON key file from GitHub.")
 
 file = gspread.authorize(creds)
 workbook = file.open("Inventory")
