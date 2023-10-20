@@ -1,8 +1,18 @@
 from fastapi import FastAPI
 from oauth2client.service_account import ServiceAccountCredentials
+from fastapi.middleware.cors import CORSMiddleware
 import gspread
+import requests
 
 app = FastAPI()
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["https://lus-sheet.onrender.com"],  # Replace with your web app's domain
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 scopes = [
     'https://www.googleapis.com/auth/spreadsheets',
@@ -10,7 +20,7 @@ scopes = [
 ]
 
 # Load Google Sheets credentials
-creds = ServiceAccountCredentials.from_json_keyfile_name("C:\\Users\\tumel\\OneDrive\\Desktop\\sheety\\data\\secretkey.json", scopes=scopes)
+creds = ServiceAccountCredentials.from_json_keyfile_name("secretkey.json", scopes=scopes)
 
 file = gspread.authorize(creds)
 workbook = file.open("Inventory")
