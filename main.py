@@ -1,18 +1,9 @@
 from fastapi import FastAPI
 from oauth2client.service_account import ServiceAccountCredentials
-from fastapi.middleware.cors import CORSMiddleware
 import gspread
 
 
 app = FastAPI()
-
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["https://lus-sheet.onrender.com"],  # Replace with your web app's domain
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
 
 scopes = [
     'https://www.googleapis.com/auth/spreadsheets',
