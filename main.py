@@ -19,29 +19,12 @@ scopes = [
     'https://www.googleapis.com/auth/drive'
 ]
 
-# URL of the JSON key file in your GitHub repository
-github_raw_url = 'https://raw.githubusercontent.com/username/repo/main/data/secretkey.json'
+# Load Google Sheets credentials
+creds = ServiceAccountCredentials.from_json_keyfile_name("secretkey.json", scopes=scopes)
 
-# Function to download the JSON key file from GitHub and create credentials
-def get_credentials():
-    response = requests.get(github_raw_url)
-
-    if response.status_code == 200:
-        json_key = response.json()
-        return service_account.Credentials.from_service_account_info(json_key, scopes=scopes)
-    else:
-        return None
-
-# Function to open the Google Sheets within the edit_shoe function
-def open_google_sheets():
-    creds = get_credentials()
-    if creds is None:
-        raise Exception("Failed to obtain credentials. Check the JSON key file or the authorization process.")
-
-    file = gspread.authorize(creds)
-    workbook = file.open("Inventory")
-    sheet = workbook.sheet1
-    return sheet
+file = gspread.authorize(creds)
+workbook = file.open("Inventory")
+sheet = workbook.sheet1
 
 @app.post("/edit-shoe")
 async def edit_shoe(
