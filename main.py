@@ -32,16 +32,16 @@ def get_credentials():
     else:
         return None
 
-# Create 'creds' globally
-creds = get_credentials()
+# Function to open the Google Sheets within the edit_shoe function
+def open_google_sheets():
+    creds = get_credentials()
+    if creds is None:
+        raise Exception("Failed to obtain credentials. Check the JSON key file or the authorization process.")
 
-# Check if 'creds' is None
-if creds is None:
-    print("Failed to obtain credentials. Check the JSON key file or the authorization process.")
-else:
     file = gspread.authorize(creds)
     workbook = file.open("Inventory")
     sheet = workbook.sheet1
+    return sheet
 
 @app.post("/edit-shoe")
 async def edit_shoe(
@@ -49,6 +49,9 @@ async def edit_shoe(
     new_cost: float = None, new_size: str = None, size: str = None, new_quantity: int = None, quantity: int = None,
     new_list_price: float = None, list_price: float = None, condition: str = None, new_condition: str = None
 ):
+    # Open Google Sheets within the edit_shoe function
+    sheet = open_google_sheets()
+    
     # Find all rows matching the specified "Shoe" and "SKU"
     all_rows = sheet.get_all_records()
     rows_to_update = []
