@@ -32,8 +32,7 @@ async def edit_shoe(
     new_cost: float = None, new_size: str = None, size: str = None, new_quantity: int = None, quantity: int = None,
     new_list_price: float = None, list_price: float = None, condition: str = None, new_condition: str = None
 ):
-    # Open Google Sheets within the edit_shoe function
-    sheet = open_google_sheets()
+
     
     # Find all rows matching the specified "Shoe" and "SKU"
     all_rows = sheet.get_all_records()
