@@ -8,7 +8,7 @@ app = FastAPI()
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Replace with your web app's domain
+    allow_origins=["https://lus-sheet.onrender.com"],  # Replace with your web app's domain
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
