@@ -2,7 +2,6 @@ from fastapi import FastAPI
 from oauth2client.service_account import ServiceAccountCredentials
 from fastapi.middleware.cors import CORSMiddleware
 import gspread
-import requests
 
 app = FastAPI()
 
@@ -32,40 +31,45 @@ async def edit_shoe(
     new_cost: float = None, new_size: str = None, size: str = None, new_quantity: int = None, quantity: int = None,
     new_list_price: float = None, list_price: float = None, condition: str = None, new_condition: str = None
 ):
-
     # Find all rows matching the specified "Shoe" and "SKU"
-    all_rows = sheet.get_all_records()
+    all_records = sheet.get_all_records()
     rows_to_update = []
 
-    for index, row in enumerate(all_rows, start=2):
-        if row.get("Shoe") == shoe_name and row.get("Sku") == sku:
-            # Create a flag to track whether any update condition is met
-            update_flag = False
+    for index, record in enumerate(all_records, start=2):
+        if record.get("Shoe") == shoe_name and record.get("Sku") == sku:
+            # Initialize a flag to check if any updates were made
+            updated = False
 
             if new_shoe_name is not None:
-                row["Shoe"] = new_shoe_name
-                update_flag = True
-            if new_sku is not None:
-                row["Sku"] = new_sku
-                update_flag = True
-            if new_cost is not None:
-                row["Cost"] = new_cost
-                update_flag = True
-            if new_size is not None and row.get("Size") == size:
-                row["Size"] = new_size
-                update_flag = True
-            if new_quantity is not None and row.get("Size") == size and row.get("Quantity") == quantity:
-                row["Quantity"] = new_quantity
-                update_flag = True
-            if new_list_price is not None and row.get("Size") == size and row.get("List Price") == list_price:
-                row["List Price"] = new_list_price
-                update_flag = True
-            if new_condition is not None and row.get("Size") == size and row.get("Condition") == condition:
-                row["Condition"] = new_condition
-                update_flag = True
+                record["Shoe"] = new_shoe_name
+                updated = True
 
-            if update_flag:
-                rows_to_update.append((index, list(row.values())))
+            if new_sku is not None:
+                record["Sku"] = new_sku
+                updated = True
+
+            if new_cost is not None:
+                record["Cost"] = new_cost
+                updated = True
+
+            if new_size is not None and record.get("Size") == size:
+                record["Size"] = new_size
+                updated = True
+
+            if new_quantity is not None and record.get("Size") == size and record.get("Quantity") == quantity:
+                record["Quantity"] = new_quantity
+                updated = True
+
+            if new_list_price is not None and record.get("Size") == size and record.get("List Price") == list_price:
+                record["List Price"] = new_list_price
+                updated = True
+
+            if new_condition is not None and record.get("Size") == size and record.get("Condition") == condition:
+                record["Condition"] = new_condition
+                updated = True
+
+            if updated:
+                rows_to_update.append((index, list(record.values())))
 
     if not rows_to_update:
         return {"message": "Shoe and SKU combination not found"}
@@ -79,4 +83,3 @@ async def edit_shoe(
         sheet.update(range_start + ":" + range_end, [columns], value_input_option="RAW")
 
     return {"message": "Cells updated"}
-
