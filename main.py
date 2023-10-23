@@ -25,7 +25,7 @@ def size_to_string(size):
 async def edit_shoe(
     shoe_name: str,
     sku: str,
-    size: str: typing.Optional[str] = Query(None, title="Optional: Size"),
+    size: typing.Optional[str] = Query(None, title="Optional: Size"),
     new_size: typing.Optional[str] = Query(None, title="Optional: New Size"),
     new_shoe_name: typing.Optional[str] = Query(None, title="Optional: New Shoe Name"),
     new_sku: typing.Optional[str] = Query(None, title="Optional: New SKU"),
