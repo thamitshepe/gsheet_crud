@@ -84,4 +84,4 @@ async def edit_shoe(
         range_end = chr(ord("A") + len(row) - 1) + str(index)
         sheet.update(range_start + ":" + range_end, [list(row.values())], value_input_option="RAW")
 
-    return {"message": "Cells updated", "size": size}
+    return {"message": "Cells updated"}
