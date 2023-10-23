@@ -21,7 +21,7 @@ sheet = workbook.sheet1
 async def edit_shoe(
     shoe_name: str,
     sku: str,
-    size: typing.Optional[str] = Query(None, title="Optional: Shoe Size"),
+    size: str,
     new_shoe_name: typing.Optional[str] = Query(None, title="Optional: New Shoe Name"),
     new_sku: typing.Optional[str] = Query(None, title="Optional: New SKU"),
     new_cost: typing.Optional[float] = Query(None, title="Optional: New Cost"),
@@ -36,7 +36,7 @@ async def edit_shoe(
     rows_to_update = []
 
     for index, row in enumerate(all_rows, start=2):
-        if row.get("Shoe") == shoe_name and row.get("Sku") == sku:
+        if row.get("Shoe") == shoe_name and row.get("Sku") == sku and row.get("Size") == size:
             # Update the columns based on the provided values
             if new_shoe_name is not None:
                 row["Shoe"] = new_shoe_name
@@ -44,18 +44,18 @@ async def edit_shoe(
                 row["Sku"] = new_sku
             if new_cost is not None:
                 row["Cost"] = new_cost
-            if row.get("Size") == size and new_size is not None:
+            if new_size is not None:
                 row["Size"] = new_size
-            if new_quantity is not None and row.get("Size") == size:
+            if new_quantity is not None:
                 row["Quantity"] = new_quantity
-            if new_list_price is not None and row.get("Size") == size:
+            if new_list_price is not None:
                 row["List Price"] = new_list_price
-            if new_condition is not None and row.get("Size") == size:
+            if new_condition is not None:
                 row["Condition"] = new_condition
             rows_to_update.append((index, list(row.values())))
 
     if not rows_to_update:
-        return {"message": "Shoe and SKU combination not found"}
+        return {"message": "Shoe, SKU and Size combination not found"}
 
     # Prepare the values for updating the specified columns
     for index, columns in rows_to_update:
