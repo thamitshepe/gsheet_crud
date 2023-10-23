@@ -35,9 +35,9 @@ async def edit_shoe(
     new_condition: typing.Optional[str] = Query(None, title="Optional: New Condition")
 ):
 
-    # Find the row matching the specified "Shoe," "SKU," and optionally "Size"
+    # Find all the rows matching the specified "Shoe," "SKU," and optionally "Size"
     all_rows = sheet.get_all_records()
-    row_to_update = None
+    rows_to_update = []
 
     for index, row in enumerate(all_rows, start=2):
         if row.get("Shoe") == shoe_name and row.get("Sku") == sku:
@@ -50,31 +50,31 @@ async def edit_shoe(
                     continue
 
             # If it reaches this point, it means it matched Shoe, SKU, and Size (if specified)
-            row_to_update = row
-            break
+            rows_to_update.append((index, row))
 
-    if not row_to_update:
+    if not rows_to_update:
         return {"message": "Shoe, SKU, and Size combination not found"}
 
-    # Update the columns based on the provided values
-    if new_size is not None:
-        row_to_update["Size"] = new_size
-    if new_shoe_name is not None:
-        row_to_update["Shoe"] = new_shoe_name
-    if new_sku is not None:
-        row_to_update["Sku"] = new_sku
-    if new_cost is not None:
-        row_to_update["Cost"] = new_cost
-    if new_quantity is not None:
-        row_to_update["Quantity"] = new_quantity
-    if new_list_price is not None:
-        row_to_update["List Price"] = new_list_price
-    if new_condition is not None:
-        row_to_update["Condition"] = new_condition
+    for index, row in rows_to_update:
+        # Update the columns based on the provided values
+        if new_size is not None:
+            row["Size"] = new_size
+        if new_shoe_name is not None:
+            row["Shoe"] = new_shoe_name
+        if new_sku is not None:
+            row["Sku"] = new_sku
+        if new_cost is not None:
+            row["Cost"] = new_cost
+        if new_quantity is not None:
+            row["Quantity"] = new_quantity
+        if new_list_price is not None:
+            row["List Price"] = new_list_price
+        if new_condition is not None:
+            row["Condition"] = new_condition
 
-    # Calculate the range for the specific row
-    range_start = f"A{index}"
-    range_end = chr(ord("A") + len(row_to_update) - 1) + str(index)
-    sheet.update(range_start + ":" + range_end, [list(row_to_update.values())], value_input_option="RAW")
+        # Calculate the range for the specific row
+        range_start = f"A{index}"
+        range_end = chr(ord("A") + len(row) - 1) + str(index)
+        sheet.update(range_start + ":" + range_end, [list(row.values())], value_input_option="RAW")
 
     return {"message": "Cells updated", "size": size}
