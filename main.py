@@ -48,7 +48,7 @@ async def edit_shoe(
             if new_condition is not None and row.get("Size") == size and row.get("Condition") == condition:
                 # Update the condition when size and condition match the conditions
                 row["Condition"] = new_condition
-            rows_to_update.append((index, list(row.values()))
+            rows_to_update.append((index, list(row.values())))
 
     if not rows_to_update:
         return {"message": "Shoe and SKU combination not found"}
