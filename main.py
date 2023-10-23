@@ -31,6 +31,9 @@ async def edit_shoe(
     new_condition: typing.Optional[str] = Query(None, title="Optional: New Condition")
 ):
 
+    # Debugging: Log the received size parameter
+    print(f"Received size parameter: '{size}'")
+
     # Find all rows matching the specified "Shoe" and "SKU"
     all_rows = sheet.get_all_records()
     rows_to_update = []
@@ -55,7 +58,7 @@ async def edit_shoe(
             rows_to_update.append((index, list(row.values())))
 
     if not rows_to_update:
-        return {"message": "Shoe, SKU and Size combination not found"}
+        return {"message": "Shoe, SKU, and Size combination not found"}
 
     # Prepare the values for updating the specified columns
     for index, columns in rows_to_update:
