@@ -47,31 +47,14 @@ async def edit_shoe(
                 row["Sku"] = new_sku
             if new_cost is not None:
                 row["Cost"] = new_cost
-            # Handle the "Size" column
-            if new_size is not None:
-                sheet_size = str(row.get("Size"))
-                if sheet_size.strip() and sheet_size.strip() == new_size.strip():
-                    row["Size"] = new_size
-                else:
-                    return {"message": "Size not found"}
-            if new_quantity is not None:
-                sheet_size = str(row.get("Size"))
-                if sheet_size.strip() and sheet_size.strip() == size.strip() and row.get("Quantity") == quantity:
-                    row["Quantity"] = new_quantity
-                else:
-                    return {"message": "Size and Quantity combination not found"}
-            if new_list_price is not None:
-                sheet_size = str(row.get("Size"))
-                if sheet_size.strip() and sheet_size.strip() == size.strip() and row.get("List Price") == list_price:
-                    row["List Price"] = new_list_price
-                else:
-                    return {"message": "Size and List Price combination not found"}
-            if new_condition is not None:
-                sheet_size = str(row.get("Size"))
-                if sheet_size.strip() and sheet_size.strip() == size.strip() and row.get("Condition") == condition:
-                    row["Condition"] = new_condition
-                else:
-                    return {"message": "Size and Condition combination not found"}
+            if row.get("Size") == size and new_size is not None:
+                row["Size"] = new_size
+            if new_quantity is not None and row.get("Size") == size and row.get("Quantity") == quantity:
+                row["Quantity"] = new_quantity
+            if new_list_price is not None and row.get("Size") == size and row.get("List Price") == list_price:
+                row["List Price"] = new_list_price
+            if new_condition is not None and row.get("Size") == size and row.get("Condition") == condition:
+                row["Condition"] = new_condition
             rows_to_update.append((index, list(row.values())))
 
     if not rows_to_update:
