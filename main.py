@@ -36,7 +36,9 @@ async def edit_shoe(
     new_cost: typing.Optional[str] = Query(None, title="Optional: New Cost"),
     new_quantity: typing.Optional[str] = Query(None, title="Optional: New Quantity"),
     new_list_price: typing.Optional[str] = Query(None, title="Optional: New List Price"),
-    new_condition: typing.Optional[str] = Query(None, title="Optional: New Condition")
+    new_condition: typing.Optional[str] = Query(None, title="Optional: New Condition"),
+    listed: typing.Optional[bool] = Query(None, title="Optional: Listed"),
+    new_listed: typing.Optional[bool] = Query(None, title="Optional: Listed")
 ):
 
     # Ensure that sku is always treated as a string
@@ -78,6 +80,10 @@ async def edit_shoe(
             row["Condition"] = new_condition
         if new_list_price is not None:
             row["List Price"] = new_list_price
+        if new_listed is not True:
+            row["Listed"] = new_listed
+            elif
+                row["Listed"] = True
 
         # Calculate the range for the specific row
         range_start = f"A{index}"
