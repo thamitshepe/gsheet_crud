@@ -25,7 +25,8 @@ def size_to_string(size):
 async def edit_shoe(
     shoe_name: str,
     sku: str,
-    size: str,  # Now "size" is a parameter that you set
+    size: str,
+    new_size: typing.Optional[str] = Query(None, title="Optional: New Size"),
     new_shoe_name: typing.Optional[str] = Query(None, title="Optional: New Shoe Name"),
     new_sku: typing.Optional[str] = Query(None, title="Optional: New SKU"),
     new_cost: typing.Optional[float] = Query(None, title="Optional: New Cost"),
@@ -34,46 +35,46 @@ async def edit_shoe(
     new_condition: typing.Optional[str] = Query(None, title="Optional: New Condition")
 ):
 
-    # Find all rows matching the specified "Shoe" and "SKU"
+    # Find the row matching the specified "Shoe," "SKU," and "Size"
     all_rows = sheet.get_all_records()
-    rows_to_update = []
+    row_to_update = None
 
     for index, row in enumerate(all_rows, start=2):
-        if row.get("Shoe") == shoe_name and row.get("Sku") == sku:
+        if row.get("Shoe") == shoe_name and row.get("Sku") == sku and row.get("Size"):
             # Use the "Size" value from the Google Sheets column
             size_from_sheets = size_to_string(row.get("Size"))
 
             # Debugging: Log the received size parameter
-            print(f"Received size parameter: '{size}' (from the request)")
+            print(f"Received size parameter from the request: '{size}'")
             print(f"Size value from Google Sheets: '{size_from_sheets}'")
 
             # Check if the size from the request matches the size from the Google Sheets
-            if size != size_from_sheets:
-                return {"message": "Size in the request does not match the Size from Google Sheets."}
+            if size == size_from_sheets:
+                row_to_update = row
+                break
 
-            # Update the columns based on the provided values
-            if new_shoe_name is not None:
-                row["Shoe"] = new_shoe_name
-            if new_sku is not None:
-                row["Sku"] = new_sku
-            if new_cost is not None:
-                row["Cost"] = new_cost
-            if new_quantity is not None:
-                row["Quantity"] = new_quantity
-            if new_list_price is not None:
-                row["List Price"] = new_list_price
-            if new_condition is not None:
-                row["Condition"] = new_condition
-            rows_to_update.append((index, list(row.values()), size_from_sheets))
-
-    if not rows_to_update:
+    if not row_to_update:
         return {"message": "Shoe, SKU, and Size combination not found"}
 
-    for index, columns, size in rows_to_update:
-        # Update the columns with the modified values
-        # Calculate the range based on the number of columns in the data
-        range_start = f"A{index}"
-        range_end = chr(ord("A") + len(columns) - 1) + str(index)
-        sheet.update(range_start + ":" + range_end, [columns], value_input_option="RAW")
+    # Update the columns based on the provided values
+    if new_size is not None:
+        row_to_update["Size"] = new_size
+    if new_shoe_name is not None:
+        row_to_update["Shoe"] = new_shoe_name
+    if new_sku is not None:
+        row_to_update["Sku"] = new_sku
+    if new_cost is not None:
+        row_to_update["Cost"] = new_cost
+    if new_quantity is not None:
+        row_to_update["Quantity"] = new_quantity
+    if new_list_price is not None:
+        row_to_update["List Price"] = new_list_price
+    if new_condition is not None:
+        row_to_update["Condition"] = new_condition
+
+    # Calculate the range for the specific row
+    range_start = f"A{index}"
+    range_end = chr(ord("A") + len(row_to_update) - 1) + str(index)
+    sheet.update(range_start + ":" + range_end, [list(row_to_update.values())], value_input_option="RAW")
 
     return {"message": "Cells updated", "size": size}
