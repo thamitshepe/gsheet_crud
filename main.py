@@ -1,6 +1,7 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Query
 from oauth2client.service_account import ServiceAccountCredentials
 import gspread
+import typing
 
 app = FastAPI()
 
@@ -18,9 +19,19 @@ sheet = workbook.sheet1
 
 @app.post("/edit-shoe")
 async def edit_shoe(
-    shoe_name: str, sku: str, size: str, quantity: int, list_price: float, condition: str, new_shoe_name: str = None, new_sku: str = None,
-    new_cost: float = None, new_size: str = None, new_quantity: int = None,
-    new_list_price: float = None, new_condition: str = None
+    shoe_name: str,
+    sku: str,
+    size: typing.Optional[str] = Query(None, title="Optional: Shoe Size"),
+    quantity: typing.Optional[int] = Query(None, title="Optional: Quantity"),
+    list_price: typing.Optional[float] = Query(None, title="Optional: List Price"),
+    condition: typing.Optional[str] = Query(None, title="Optional: Condition"),
+    new_shoe_name: typing.Optional[str] = Query(None, title="Optional: New Shoe Name"),
+    new_sku: typing.Optional[str] = Query(None, title="Optional: New SKU"),
+    new_cost: typing.Optional[float] = Query(None, title="Optional: New Cost"),
+    new_size: typing.Optional[str] = Query(None, title="Optional: New Size"),
+    new_quantity: typing.Optional[int] = Query(None, title="Optional: New Quantity"),
+    new_list_price: typing.Optional[float] = Query(None, title="Optional: New List Price"),
+    new_condition: typing.Optional[str] = Query(None, title="Optional: New Condition")
 ):
 
     # Find all rows matching the specified "Shoe" and "SKU"
