@@ -28,43 +28,28 @@ async def edit_shoe(
     all_rows = sheet.get_all_records()
     rows_to_update = []
 
-    for index, row in enumerate(all_rows, start=2):
-        if row.get("Shoe") == shoe_name and row.get("Sku") == sku:
-            # Update the columns based on the provided values and conditions
-            if new_shoe_name is not None:
-                row["Shoe"] = new_shoe_name
-            if new_sku is not None:
-                row["Sku"] = new_sku
-            if new_cost is not None:
-                row["Cost"] = new_cost
-            if new_size is not None:
-                # Specific condition for size update
-                if (
-                    row.get("Size") == size
-                ):
-                    row["Size"] = new_size
-            if new_quantity is not None:
-                # Specific condition for quantity update
-                if (
-                    row.get("Size") == size
-                    and row.get("Quantity") == quantity
-                ):
-                    row["Quantity"] = new_quantity
-            if new_list_price is not None:
-                # Specific condition for list price update
-                if (
-                    row.get("Size") == size
-                    and row.get("List Price") == list_price
-                ):
-                    row["List Price"] = new_list_price
-            if new_condition is not None:
-                # Specific condition for condition update
-                if (
-                    row.get("Size") == size
-                    and row.get("Condition") == condition
-                ):
-                    row["Condition"] = new_condition
-            rows_to_update.append((index, list(row.values())))
+for index, row in enumerate(all_rows, start=2):
+    if row.get("Shoe") == shoe_name and row.get("Sku") == sku:
+        # Update the columns based on the provided values
+        if new_shoe_name is not None:
+            row["Shoe"] = new_shoe_name
+        if new_sku is not None:
+            row["Sku"] = new_sku
+        if new_cost is not None:
+            row["Cost"] = new_cost
+        if new_size is not None and row.get("Size") == size:
+            # Update the size only when the size matches the specified condition
+            row["Size"] = new_size
+        if new_quantity is not None and row.get("Size") == size and row.get("Quantity") == quantity:
+            # Update the quantity when both size and quantity match the conditions
+            row["Quantity"] = new_quantity
+        if new_list_price is not None and row.get("Size") == size and row.get("List Price") == list_price:
+            # Update the list price when size and list price match the conditions
+            row["List Price"] = new_list_price
+        if new_condition is not None and row.get("Size") == size and row.get("Condition") == condition:
+            # Update the condition when size and condition match the conditions
+            row["Condition"] = new_condition
+        rows_to_update.append((index, list(row.values())))
 
     if not rows_to_update:
         return {"message": "Shoe and SKU combination not found"}
