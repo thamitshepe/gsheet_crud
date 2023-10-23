@@ -33,9 +33,9 @@ async def edit_shoe(
     new_size: typing.Optional[str] = Query(None, title="Optional: New Size"),
     new_shoe_name: typing.Optional[str] = Query(None, title="Optional: New Shoe Name"),
     new_sku: typing.Optional[str] = Query(None, title="Optional: New SKU"),
-    new_cost: typing.Optional[float] = Query(None, title="Optional: New Cost"),
-    new_quantity: typing.Optional[int] = Query(None, title="Optional: New Quantity"),
-    new_list_price: typing.Optional[float] = Query(None, title="Optional: New List Price"),
+    new_cost: typing.Optional[str] = Query(None, title="Optional: New Cost"),
+    new_quantity: typing.Optional[str] = Query(None, title="Optional: New Quantity"),
+    new_list_price: typing.Optional[str] = Query(None, title="Optional: New List Price"),
     new_condition: typing.Optional[str] = Query(None, title="Optional: New Condition")
 ):
 
