@@ -44,7 +44,7 @@ async def edit_shoe(
                 row["Sku"] = new_sku
             if new_cost is not None:
                 row["Cost"] = new_cost
-            if new_size is not None and row.get("Size") == size:
+            if row.get("Size") == size and new_size is not None:
                 row["Size"] = new_size
             if new_quantity is not None and row.get("Size") == size:
                 row["Quantity"] = new_quantity
