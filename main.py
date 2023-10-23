@@ -44,13 +44,13 @@ async def edit_shoe(
                 row["Sku"] = new_sku
             if new_cost is not None:
                 row["Cost"] = new_cost
-            if row.get("Size") == size and new_size is not None:
+            if new_size is not None and row.get("Size") == size:
                 row["Size"] = new_size
-            if row.get("Size") == size and new_quantity is not None:
+            if new_quantity is not None and row.get("Size") == size:
                 row["Quantity"] = new_quantity
-            if row.get("Size") == size and new_list_price is not None:
+            if new_list_price is not None and row.get("Size") == size:
                 row["List Price"] = new_list_price
-            if row.get("Size") == size and new_condition is not None:
+            if new_condition is not None and row.get("Size") == size:
                 row["Condition"] = new_condition
             rows_to_update.append((index, list(row.values())))
 
