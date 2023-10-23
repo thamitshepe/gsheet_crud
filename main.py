@@ -18,7 +18,7 @@ sheet = workbook.sheet1
 
 @app.post("/edit-shoe")
 async def edit_shoe(
-    shoe_name: str, sku: str, size: str = None, quantity: int = None, list_price: float = None, condition: str = None, new_shoe_name: str = None, new_sku: str = None,
+    shoe_name: str, sku: str, size: str, quantity: int, list_price: float, condition: str, new_shoe_name: str = None, new_sku: str = None,
     new_cost: float = None, new_size: str = None, new_quantity: int = None,
     new_list_price: float = None, new_condition: str = None
 ):
@@ -52,7 +52,7 @@ async def edit_shoe(
                 row["Condition"] = new_condition
             elif new_condition is not None:
                 return {"message": "Size and Condition combination not found"}
-            rows_to_update.append((index, list(row.values())))
+            rows_to_update.append((index, list(row.values()))
 
     if not rows_to_update:
         return {"message": "Shoe and SKU combination not found"}
