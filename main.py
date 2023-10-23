@@ -21,6 +21,10 @@ def size_to_string(size):
     # Function to ensure size is always a string
     return str(size)
 
+def sku_to_string(sku):
+    # Function to ensure sku is always a string
+    return str(sku)
+
 @app.post("/edit-shoe")
 async def edit_shoe(
     shoe_name: str,
@@ -35,12 +39,15 @@ async def edit_shoe(
     new_condition: typing.Optional[str] = Query(None, title="Optional: New Condition")
 ):
 
+    # Ensure that sku is always treated as a string
+    sku = sku_to_string(sku)
+
     # Find all the rows matching the specified "Shoe," "SKU," and optionally "Size"
     all_rows = sheet.get_all_records()
     rows_to_update = []
 
     for index, row in enumerate(all_rows, start=2):
-        if row.get("Shoe") == shoe_name and row.get("Sku") == sku:
+        if row.get("Shoe") == shoe_name and sku_to_string(row.get("Sku")) == sku:
             if size:  # If "size" is provided in the request, consider it
                 if row.get("Size"):
                     size_from_sheets = size_to_string(row.get("Size"))
@@ -62,7 +69,7 @@ async def edit_shoe(
         if new_shoe_name is not None:
             row["Shoe"] = new_shoe_name
         if new_sku is not None:
-            row["Sku"] = new_sku
+            row["Sku"] = sku_to_string(new_sku)  # Ensure new_sku is treated as a string
         if new_cost is not None:
             row["Cost"] = new_cost
         if new_quantity is not None:
