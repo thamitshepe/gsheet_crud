@@ -22,9 +22,6 @@ async def edit_shoe(
     shoe_name: str,
     sku: str,
     size: typing.Optional[str] = Query(None, title="Optional: Shoe Size"),
-    quantity: typing.Optional[int] = Query(None, title="Optional: Quantity"),
-    list_price: typing.Optional[float] = Query(None, title="Optional: List Price"),
-    condition: typing.Optional[str] = Query(None, title="Optional: Condition"),
     new_shoe_name: typing.Optional[str] = Query(None, title="Optional: New Shoe Name"),
     new_sku: typing.Optional[str] = Query(None, title="Optional: New SKU"),
     new_cost: typing.Optional[float] = Query(None, title="Optional: New Cost"),
@@ -47,23 +44,14 @@ async def edit_shoe(
                 row["Sku"] = new_sku
             if new_cost is not None:
                 row["Cost"] = new_cost
-
-            if row.get("Size") == size:
-                if new_size is not None:
-                    row["Size"] = new_size
-
-            if row.get("Size") == size and row.get("Quantity") == quantity:
-                if new_quantity is not None:
-                    row["Quantity"] = new_quantity
-
-            if row.get("Size") == size and row.get("List Price") == list_price:
-                if new_list_price is not None:
-                    row["List Price"] = new_list_price
-
-            if row.get("Size") == size and row.get("Condition") == condition:
-                if new_condition is not None:
-                    row["Condition"] = new_condition
-
+            if row.get("Size") == size and new_size is not None:
+                row["Size"] = new_size
+            if row.get("Size") == size and new_quantity is not None:
+                row["Quantity"] = new_quantity
+            if row.get("Size") == size and new_list_price is not None:
+                row["List Price"] = new_list_price
+            if row.get("Size") == size and new_condition is not None:
+                row["Condition"] = new_condition
             rows_to_update.append((index, list(row.values())))
 
     if not rows_to_update:
