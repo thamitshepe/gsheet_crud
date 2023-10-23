@@ -80,9 +80,9 @@ async def edit_shoe(
         if new_list_price is not None:
             row["List Price"] = new_list_price
         if listed is not True:
-            row["Listed"] = False
-        else:
             row["Listed"] = True
+        else:
+            row["Listed"] = False
 
 
 
