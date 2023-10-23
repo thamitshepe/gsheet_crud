@@ -80,10 +80,11 @@ async def edit_shoe(
             row["Condition"] = new_condition
         if new_list_price is not None:
             row["List Price"] = new_list_price
-        if new_listed is not True:
+        if listed is not True:
             row["Listed"] = new_listed
-            elif
-                row["Listed"] = True
+        else:
+            row["Listed"] = True
+
 
         # Calculate the range for the specific row
         range_start = f"A{index}"
