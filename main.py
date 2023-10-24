@@ -38,6 +38,9 @@ async def edit_shoe(
     new_list_price: typing.Optional[str] = Query(None, title="Optional: New List Price"),
     new_condition: typing.Optional[str] = Query(None, title="Optional: New Condition"),
     listed: typing.Optional[bool] = Query(None, title="Optional: Listed")
+    source: typing.Optional[str] = Query(None, title="Optional: Source"),
+    seller: typing.Optional[str] = Query(None, title="Optional: Seller"),
+    note: typing.Optional[str] = Query(None, title="Optional: Note")
 ):
 
     # Ensure that sku is always treated as a string
@@ -83,6 +86,12 @@ async def edit_shoe(
             row["Listed"] = True
         else:
             row["Listed"] = False
+        if source is not None:
+            row["Source"] = source
+        if seller is not None:
+            row["Seller"] = seller
+        if note is not None:
+            row["Note"] = note
 
 
 
