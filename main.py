@@ -37,7 +37,7 @@ async def edit_shoe(
     new_quantity: typing.Optional[str] = Query(None, title="Optional: New Quantity"),
     new_list_price: typing.Optional[str] = Query(None, title="Optional: New List Price"),
     new_condition: typing.Optional[str] = Query(None, title="Optional: New Condition"),
-    listed: typing.Optional[bool] = Query(None, title="Optional: Listed")
+    listed: typing.Optional[bool] = Query(None, title="Optional: Listed"),
     source: typing.Optional[str] = Query(None, title="Optional: Source"),
     seller: typing.Optional[str] = Query(None, title="Optional: Seller"),
     note: typing.Optional[str] = Query(None, title="Optional: Note")
