@@ -1,6 +1,6 @@
-import gspread
 from fastapi import FastAPI, Query
 from oauth2client.service_account import ServiceAccountCredentials
+import gspread
 import typing
 
 app = FastAPI()
@@ -15,7 +15,7 @@ creds = ServiceAccountCredentials.from_json_keyfile_name("secretkey.json", scope
 
 file = gspread.authorize(creds)
 workbook = file.open("Inventory")
-sheet = workbook.sheet1  # Define the specific sheet in your workbook
+sheet = workbook.sheet1
 
 def size_to_string(size):
     # Function to ensure size is always a string
@@ -41,20 +41,13 @@ async def edit_shoe(
     source: typing.Optional[str] = Query(None, title="Optional: Source"),
     seller: typing.Optional[str] = Query(None, title="Optional: Seller"),
     note: typing.Optional[str] = Query(None, title="Optional: Note"),
-    delete: typing.Optional[bool] = Query(False, title="Optional: Delete"),
-    add_size: typing.Optional[str] = Query(None, title="Optional: Add Size"),
-    cost: typing.Optional[str] = Query(None, title="Optional: Cost"),
-    complete: typing.Optional[str] = Query(None, title="Optional: Complete"),
-    cur_source: typing.Optional[str] = Query(None, title="Optional: Current Source"),
-    cur_seller: typing.Optional[str] = Query(None, title="Optional: Current Seller"),
-    cur_note: typing.Optional[str] = Query(None, title="Optional: Current Note"),
-    date: typing.Optional[str] = Query(None, title="Optional: Date")
+    delete: typing.Optional[bool] = Query(False, title="Optional: Delete")
 ):
 
     # Ensure that sku is always treated as a string
     sku = sku_to_string(sku)
 
-# updating and deleting rows
+    # Find all the rows matching the specified "Shoe," "SKU," and optionally "Size"
     all_rows = sheet.get_all_records()
     rows_to_update = []
 
