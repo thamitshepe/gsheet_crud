@@ -7,7 +7,7 @@ app = FastAPI()
 
 scopes = [
     'https://www.googleapis.com/auth/spreadsheets',
-    'https://www.googleapis.com/auth/drive'
+    'https.googleapis.com/auth/drive'
 ]
 
 # Load Google Sheets credentials
@@ -50,10 +50,8 @@ async def edit_shoe(
     cur_note: typing.Optional[str] = Query(None, title="Optional: Current Note"),
     date: typing.Optional[str] = Query(None, title="Optional: Date")
 ):
-
     # Ensure that sku is always treated as a string
     sku = sku_to_string(sku)
-
 
     # Find the first row (header row) of the sheet to get the column titles
     header_row = sheet.row_values(1)
@@ -76,22 +74,7 @@ async def edit_shoe(
             column_index = header_row.index(field_name) + 1
             new_row[column_index] = field_value
 
-# Insert the new row if "add_size" and "cost" are provided
-if add_size is not None and cost is not None:
-    # Find the last row with the same SKU
-    last_row_index = None
-    for index, row in enumerate(sheet.get_all_records(), start=2):
-        if sku_to_string(row.get("Sku")) == sku:
-            last_row_index = index
-
-    # If a matching row is found, insert the new row immediately after it
-    if last_row_index is not None:
-        sheet.insert_rows([list(new_row.values())], last_row_index + 1)
-        return {"message": "New size added"}
-
-
-    
-    # Insert a new row if "add_size" and "cost" are provided
+    # Insert the new row if "add_size" and "cost" are provided
     if add_size is not None and cost is not None:
         # Find the last row with the same SKU
         last_row_index = None
