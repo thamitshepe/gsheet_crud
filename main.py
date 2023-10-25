@@ -70,8 +70,10 @@ async def edit_shoe(
     # Find the first row (header row) of the sheet to get the column titles
     header_row = sheet.row_values(1)
 
-    # Construct the new row
-    new_row = {}
+    # Construct the new row as a list of empty strings
+    new_row = [""] * len(header_row)
+
+    # Fill in the new_row list with data for the fields that have values
     for field_name, field_value in {
         "Shoe": shoe_name,
         "Sku": sku,
@@ -85,12 +87,9 @@ async def edit_shoe(
         "Date": date
     }.items():
         if field_value is not None:
-            # Find the column name corresponding to the field name
-            column_name = field_to_column.get(field_name)
-            if column_name is not None:
-                # Find the index of the matching column title
-                column_index = header_row.index(column_name) + 1
-                new_row[column_index] = field_value
+            # Find the index of the matching column title
+            column_index = header_row.index(field_name)
+            new_row[column_index] = field_value
 
     # Insert the new row if "add_size" and "cost" are provided
     if add_size is not None and cost is not None:
@@ -100,12 +99,9 @@ async def edit_shoe(
             if sku_to_string(row.get("Sku")) == sku:
                 last_row_index = index
 
-        # Construct the new row based on the field names from the header row
-        new_row = {column_index: field_value for column_index, field_value in new_row.items()}
-
         # If a matching row is found, insert the new row immediately after it
         if last_row_index is not None:
-            sheet.insert_rows([list(new_row.get(column_index, "")) for column_index in range(1, len(header_row) + 1)], last_row_index + 1)
+            sheet.insert_rows(new_row, last_row_index + 1)
             return {"message": "New size added"}
 
     return {"message": "add_size and cost are required for the operation"}
