@@ -31,7 +31,7 @@ def sku_to_string(sku):
 @app.post("/edit-shoe")
 async def edit_shoe(
     shoe_name: str,
-    sku: typing.Union[str, list],  # Accepts both single string and list
+    sku: typing.List[str],
     size: typing.Optional[str] = Query(None, title="Optional: Size"),
     new_size: typing.Optional[str] = Query(None, title="Optional: New Size"),
     new_shoe_name: typing.Optional[str] = Query(None, title="Optional: New Shoe Name"),
