@@ -54,19 +54,34 @@ async def edit_shoe(
     # Ensure that sku is always treated as a string
     sku = sku_to_string(sku)
 
-    # Construct the new row
+
+        # Define a mapping of field names to column titles
+    column_mapping = {
+        "Shoe": "Shoe",
+        "Sku": "Sku",
+        "Cost": "Cost",
+        "Size": "Size",
+        "Complete": "Complete",
+        "Source": "Source",
+        "Seller": "Seller",
+        "Note": "Note",
+        "Date": "Date"
+    }
+    
+    # Construct the new row based on the field names
     new_row = {
-        "Shoe": shoe_name,
-        "Sku": sku,
-        "Cost": cost,
-        "Size": add_size,
-        "Complete": complete,
-        "Source": cur_source,
-        "Seller": cur_seller,
-        "Note": cur_note,
-        "Date": date
+        column_mapping.get("Shoe", "Shoe"): shoe_name,
+        column_mapping.get("Sku", "Sku"): sku,
+        column_mapping.get("Cost", "Cost"): cost,
+        column_mapping.get("Size", "Size"): add_size,
+        column_mapping.get("Complete", "Complete"): complete,
+        column_mapping.get("Source", "Source"): cur_source,
+        column_mapping.get("Seller", "Seller"): cur_seller,
+        column_mapping.get("Note", "Note"): cur_note,
+        column_mapping.get("Date", "Date"): date
     }
 
+    
     # Insert a new row if "add_size" and "cost" are provided
     if add_size is not None and cost is not None:
         # Find the last row with the same SKU
