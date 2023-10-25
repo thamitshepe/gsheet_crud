@@ -139,27 +139,38 @@ async def add_size(
     sku = sku_to_string(sku)
     add_size = size_to_string(add_size)
 
-    # Get the header row (the row containing field names)
-    header_row = sheet.row_values(1)  # Assuming header row is the first row
+    # Find the last row containing the specified SKU
+    all_records = sheet.get_all_records()
+    last_row_index = None
 
-    # Create a dictionary to map column names to their respective index
-    column_mapping = {header: index for index, header in enumerate(header_row)}
+    for index, row in enumerate(all_records, start=2):
+        if sku_to_string(row.get("Sku")) == sku:
+            last_row_index = index
 
-    # Create a new row with the provided data
-    new_row = [""] * len(header_row)  # Initialize a list with empty values
+    if last_row_index is not None:
+        # Get the header row (the row containing field names)
+        header_row = sheet.row_values(1)  # Assuming header row is the first row
 
-    # Map the data to the appropriate columns
-    new_row[column_mapping["Shoe"]] = shoe_name
-    new_row[column_mapping["Sku"]] = sku
-    new_row[column_mapping["Size"]] = add_size
-    new_row[column_mapping["Complete"]] = complete
-    new_row[column_mapping["Source"]] = cur_source
-    new_row[column_mapping["Seller"]] = cur_seller
-    new_row[column_mapping["Note"]] = cur_note
-    new_row[column_mapping["Date"]] = date
-    new_row[column_mapping["Cost"]] = cost
+        # Create a dictionary to map column names to their respective index
+        column_mapping = {header: index for index, header in enumerate(header_row)}
 
-    # Insert a new row right after the last row containing the specified SKU
-    sheet.insert_rows([new_row], last_row_index + 1)
+        # Create a new row with the provided data
+        new_row = [""] * len(header_row)  # Initialize a list with empty values
 
-    return {"message": "New size added"}
+        # Map the data to the appropriate columns
+        new_row[column_mapping["Shoe"]] = shoe_name
+        new_row[column_mapping["Sku"]] = sku
+        new_row[column_mapping["Size"]] = add_size
+        new_row[column_mapping["Complete"]] = complete
+        new_row[column_mapping["Source"]] = cur_source
+        new_row[column_mapping["Seller"]] = cur_seller
+        new_row[column_mapping["Note"]] = cur_note
+        new_row[column_mapping["Date"]] = date
+        new_row[column_mapping["Cost"]] = cost
+
+        # Insert a new row right after the last row containing the specified SKU
+        sheet.insert_rows([new_row], last_row_index + 1)
+
+        return {"message": "New size added"}
+    else:
+        return {"message": "No rows found for the specified SKU"}
