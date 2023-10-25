@@ -50,19 +50,14 @@ async def edit_shoe(
     # Find all the rows matching the specified "Shoe," "SKU," and optionally "Size"
     all_rows = sheet.get_all_records()
     rows_to_update = []
-
+    
     for index, row in enumerate(all_rows, start=2):
-        if row.get("Shoe") == shoe_name or sku_to_string(row.get("Sku")) == sku:
-            if size:  # If "size" is provided in the request, consider it
-                if row.get("Size"):
-                    size_from_sheets = size_to_string(row.get("Size"))
-                    if size != size_from_sheets:
-                        continue
-                else:
-                    continue
+        if row.get("Shoe") == shoe_name:
+            if (sku is None) or (sku_to_string(row.get("Sku")) == sku):
+                if (size is None) or (row.get("Size") and size_to_string(row.get("Size")) == size):
+                    # If it reaches this point, it means it matched Shoe, SKU, and Size (if specified)
+                    rows_to_update.append((index, row))
 
-            # If it reaches this point, it means it matched Shoe, SKU, and Size (if specified)
-            rows_to_update.append((index, row))
 
     if delete:
         rows_to_delete = []
