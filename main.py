@@ -99,12 +99,15 @@ async def edit_shoe(
             if sku_to_string(row.get("Sku")) == sku:
                 last_row_index = index
 
+        # Construct the new row based on the field names from the header row
+        new_row = {column_index: field_value for column_index, field_value in new_row.items()}
+
         # If a matching row is found, insert the new row immediately after it
         if last_row_index is not None:
-            sheet.insert_rows([list(new_row.values())], last_row_index + 1)
+            sheet.insert_rows([list(new_row.get(column_index, "")) for column_index in range(1, len(header_row) + 1)], last_row_index + 1)
             return {"message": "New size added"}
 
-    # Find all the rows matching the specified "Shoe," "SKU," and optionally "Size"
+    # Rest of the code for updating and deleting rows
     all_rows = sheet.get_all_records()
     rows_to_update = []
 
