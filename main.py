@@ -41,11 +41,44 @@ async def edit_shoe(
     source: typing.Optional[str] = Query(None, title="Optional: Source"),
     seller: typing.Optional[str] = Query(None, title="Optional: Seller"),
     note: typing.Optional[str] = Query(None, title="Optional: Note"),
-    delete: typing.Optional[bool] = Query(False, title="Optional: Delete")
+    delete: typing.Optional[bool] = Query(False, title="Optional: Delete"),
+    add_size: typing.Optional[str] = Query(None, title="Optional: Add Size"),
+    complete: typing.Optional[str] = Query(None, title="Optional: Add Size"),
+    cur_source: typing.Optional[str] = Query(None, title="Optional: Add Size"),
+    cur_seller: typing.Optional[str] = Query(None, title="Optional: Add Size"),
+    quantity: typing.Optional[str] = Query(None, title="Optional: Add Size"),
+    cur_note: typing.Optional[str] = Query(None, title="Optional: Add Size"),
+    date: typing.Optional[str] = Query(None, title="Optional: Add Size"),
+    cost: typing.Optional[str] = Query(None, title="Optional: Cost")
 ):
 
     # Ensure that sku is always treated as a string
     sku = sku_to_string(sku)
+
+    # Insert a new row if "add_size" and "cost" are provided
+    if add_size is not None:
+        # Find the last row with the same SKU
+        last_row_index = None
+        for index, row in enumerate(sheet.get_all_records(), start=2):
+            if sku_to_string(row.get("Sku")) == sku:
+                last_row_index = index
+
+        # If a matching row is found, insert the new row immediately after it
+        if last_row_index is not None:
+            new_row = {
+                "Shoe": shoe_name,
+                "Sku": sku,
+                "Cost": cost,
+                "Size": add_size,
+                "Complete": complete,
+                "Source": cur_source,
+                "Seller": cur_seller,
+                "Note": cur_note,
+                "Date": date
+            
+            }
+            sheet.insert_rows([list(new_row.values())], last_row_index + 1)
+            return {"message": "New size added"}
 
     # Find all the rows matching the specified "Shoe," "SKU," and optionally "Size"
     all_rows = sheet.get_all_records()
