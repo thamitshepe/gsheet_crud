@@ -122,3 +122,50 @@ async def edit_shoe(
         sheet.update(range_start + ":" + range_end, [list(row.values())], value_input_option="RAW")
 
     return {"message": "Cells updated"}
+
+@app.post("/add-size")
+async def add_size(
+    shoe_name: str,
+    sku: str,
+    add_size: typing.Optional[str] = Query(None, title="Size"),
+    complete: typing.Optional[str] = Query(None, title="Complete"),
+    cur_source: typing.Optional[str] = Query(None, title="Source"),
+    cur_seller: typing.Optional[str] = Query(None, title="Seller"),
+    cur_note: typing.Optional[str] = Query(None, title="Note"),
+    date: typing.Optional[str] = Query(None, title="Date"),
+    cost: typing.Optional[str] = Query(None, title="Cost")
+):
+    # Ensure that sku and add_size are always treated as strings
+    sku = sku_to_string(sku)
+    add_size = size_to_string(add_size)
+
+    # Find the last row containing the specified SKU
+    all_rows = sheet.get_all_records()
+    last_row_index = None
+
+    for index, row in enumerate(all_rows, start=2):
+        if sku_to_string(row.get("Sku")) == sku:
+            last_row_index = index
+
+    if last_row_index is not None:
+        # Create a new row with the provided data
+        new_row = {
+            "Shoe": shoe_name,
+            "Sku": sku,
+            "Size": add_size,
+            "Complete": complete,
+            "Source": cur_source,
+            "Seller": cur_seller,
+            "Note": cur_note,
+            "Date": date,
+            "Cost": cost
+        }
+
+        # Calculate the range for the specific row (the last row with the specified SKU)
+        range_start = f"A{last_row_index + 1}"
+        range_end = chr(ord("A") + len(new_row) - 1) + str(last_row_index + 1)
+        sheet.update(range_start + ":" + range_end, [list(new_row.values())], value_input_option="RAW")
+
+        return {"message": "New size added"}
+    else:
+        return {"message": "No rows found for the specified SKU"}
