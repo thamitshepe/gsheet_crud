@@ -17,6 +17,19 @@ file = gspread.authorize(creds)
 workbook = file.open("Inventory")
 sheet = workbook.sheet1
 
+# Define a dictionary to map field names to column names
+field_to_column = {
+    "Shoe": "Shoe",
+    "Sku": "Sku",
+    "Cost": "Cost",
+    "Size": "Size",
+    "Complete": "Complete",
+    "Source": "Source",
+    "Seller": "Seller",
+    "Note": "Note",
+    "Date": "Date"
+}
+
 def size_to_string(size):
     # Function to ensure size is always a string
     return str(size)
@@ -60,9 +73,9 @@ async def edit_shoe(
     # Construct the new row
     new_row = {}
     for field_name, field_value in {
-        "Shoe": new_shoe_name,
-        "Sku": new_sku,
-        "Cost": new_cost,
+        "Shoe": shoe_name,
+        "Sku": sku,
+        "Cost": cost,
         "Size": add_size,
         "Complete": complete,
         "Source": cur_source,
@@ -71,9 +84,12 @@ async def edit_shoe(
         "Date": date
     }.items():
         if field_value is not None:
-            # Find the index of the matching column title
-            column_index = header_row.index(field_name) + 1
-            new_row[column_index] = field_value
+            # Find the column name corresponding to the field name
+            column_name = field_to_column.get(field_name)
+            if column_name is not None:
+                # Find the index of the matching column title
+                column_index = header_row.index(column_name) + 1
+                new_row[column_index] = field_value
 
     # Insert the new row if "add_size" and "cost" are provided
     if add_size is not None and cost is not None:
