@@ -68,19 +68,17 @@ async def edit_shoe(
         "Date": "Date"
     }
     
-    # Construct the new row based on the field names
-    new_row = {
-        column_mapping.get("Shoe", "Shoe"): shoe_name,
-        column_mapping.get("Sku", "Sku"): sku,
-        column_mapping.get("Cost", "Cost"): cost,
-        column_mapping.get("Size", "Size"): add_size,
-        column_mapping.get("Complete", "Complete"): complete,
-        column_mapping.get("Source", "Source"): cur_source,
-        column_mapping.get("Seller", "Seller"): cur_seller,
-        column_mapping.get("Note", "Note"): cur_note,
-        column_mapping.get("Date", "Date"): date
-    }
-
+   # Construct the new row based on the field names
+    new_row = {}
+    new_row["Shoe"] = shoe_name
+    new_row["Sku"] = sku
+    new_row["Cost"] = cost
+    new_row["Size"] = add_size
+    new_row["Complete"] = complete
+    new_row["Source"] = cur_source
+    new_row["Seller"] = cur_seller
+    new_row["Note"] = cur_note
+    new_row["Date"] = date
     
     # Insert a new row if "add_size" and "cost" are provided
     if add_size is not None and cost is not None:
