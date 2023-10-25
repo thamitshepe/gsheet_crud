@@ -17,20 +17,6 @@ file = gspread.authorize(creds)
 workbook = file.open("Inventory")
 sheet = workbook.sheet1
 
-from fastapi import FastAPI, Query
-import gspread
-from oauth2client.service_account import ServiceAccountCredentials
-import typing
-
-app = FastAPI()
-
-# Initialize your Google Sheets client and open the desired spreadsheet (replace with your own credentials and spreadsheet ID)
-scope = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
-credentials = ServiceAccountCredentials.from_json_keyfile_name("your-credentials.json", scope)
-gc = gspread.authorize(credentials)
-spreadsheet = gc.open_by_key("your-spreadsheet-id")
-sheet = spreadsheet.get_worksheet(0)
-
 def size_to_string(size):
     return str(size)
 
