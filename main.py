@@ -17,6 +17,14 @@ file = gspread.authorize(creds)
 workbook = file.open("Inventory")
 sheet = workbook.sheet1
 
+def size_to_string(size):
+    # Function to ensure size is always a string
+    return str(size)
+
+def sku_to_string(sku):
+    # Function to ensure sku is always a string
+    return str(sku)
+
 @app.post("/edit-shoe")
 async def edit_shoe(
     shoe_name: str,
@@ -36,25 +44,36 @@ async def edit_shoe(
     delete: typing.Optional[bool] = Query(False, title="Optional: Delete")
 ):
 
-    # Find all the rows matching the specified "Shoe"
+    # Ensure that sku is always treated as a string
+    sku = sku_to_string(sku)
+
+    # Find all the rows matching the specified "Shoe," "SKU," and optionally "Size"
     all_rows = sheet.get_all_records()
     rows_to_update = []
 
     for index, row in enumerate(all_rows, start=2):
-        if row.get("Shoe") == shoe_name:
-            if sku is not None:
-                if row.get("Sku") != sku:
-                    continue
-            if size is not None:
-                if row.get("Size") != size:
+        if row.get("Shoe") == shoe_name or sku_to_string(row.get("Sku")) == sku:
+            if size:  # If "size" is provided in the request, consider it
+                if row.get("Size"):
+                    size_from_sheets = size_to_string(row.get("Size"))
+                    if size != size_from_sheets:
+                        continue
+                else:
                     continue
 
-            # If it reaches this point, it means it matched Shoe and optionally SKU and Size
+            # If it reaches this point, it means it matched Shoe, SKU, and Size (if specified)
             rows_to_update.append((index, row))
 
     if delete:
-        rows_to_delete = [index for index, row in enumerate(all_rows, start=2)
-                          if row.get("Shoe") == shoe_name and (sku is None or row.get("Sku") == sku) and (size is None or row.get("Size") == size)]
+        rows_to_delete = []
+        if size:
+            # Delete specific SKU and Size combination
+            rows_to_delete = [index for index, row in enumerate(all_rows, start=2)
+                              if sku_to_string(row.get("Sku")) == sku and size_to_string(row.get("Size")) == size]
+        else:
+            # Delete all rows with a specific SKU
+            rows_to_delete = [index for index, row in enumerate(all_rows, start=2)
+                              if sku_to_string(row.get("Sku")) == sku]
 
         if not rows_to_delete:
             return {"message": "No rows found for deletion"}
@@ -77,7 +96,7 @@ async def edit_shoe(
         if new_shoe_name is not None:
             row["Shoe"] = new_shoe_name
         if new_sku is not None:
-            row["Sku"] = new_sku
+            row["Sku"] = sku_to_string(new_sku)  # Ensure new_sku is treated as a string
         if new_cost is not None:
             row["Cost"] = new_cost
         if new_quantity is not None:
@@ -103,7 +122,6 @@ async def edit_shoe(
         sheet.update(range_start + ":" + range_end, [list(row.values())], value_input_option="RAW")
 
     return {"message": "Cells updated"}
-
 
 @app.post("/add-size")
 async def add_size(
