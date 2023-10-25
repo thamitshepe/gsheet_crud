@@ -70,9 +70,9 @@ async def edit_shoe(
     
     # Construct the new row based on the field names
     new_row = {column_mapping[field_name]: field_value for field_name, field_value in {
-        "Shoe": new_shoe_name,
-        "Sku": new_sku,
-        "Cost": new_cost,
+        "Shoe": shoe_name,
+        "Sku": sku,
+        "Cost": cost,
         "Size": add_size,
         "Complete": complete,
         "Source": cur_source,
