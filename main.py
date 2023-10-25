@@ -1,6 +1,6 @@
+import gspread
 from fastapi import FastAPI, Query
 from oauth2client.service_account import ServiceAccountCredentials
-import gspread
 import typing
 
 app = FastAPI()
@@ -15,7 +15,7 @@ creds = ServiceAccountCredentials.from_json_keyfile_name("secretkey.json", scope
 
 file = gspread.authorize(creds)
 workbook = file.open("Inventory")
-sheet = workbook.sheet1
+sheet = workbook.sheet1  # Define the specific sheet in your workbook
 
 # Define a dictionary to map field names to column names
 field_to_column = {
@@ -87,14 +87,14 @@ async def edit_shoe(
     if add_size is not None and cost is not None:
         # Find the last row with the same SKU
         last_row_index = None
-        cell_values = worksheet.col_values(2)  # Assuming SKU is in the second column (adjust if different)
+        cell_values = sheet.col_values(2)  # Assuming SKU is in the second column (adjust if different)
         for index, sku_value in enumerate(cell_values, start=1):
             if sku_value == sku:
                 last_row_index = index
 
         # If a matching row is found, insert the new row immediately after it
         if last_row_index is not None:
-            worksheet.insert_rows([new_row.get(column_name, "") for column_name in worksheet.row_values(1)], last_row_index + 1)
+            sheet.insert_rows([new_row.get(column_name, "") for column_name in sheet.row_values(1)], last_row_index + 1)
             return {"message": "New size added"}
         else:
             return {"message": "SKU not found"}
