@@ -171,10 +171,12 @@ async def add_size(
             else:
                 new_row_list.append("")
 
+        # Ensure that the new row is a list of lists (list of cells, where each cell is a string)
+        new_row_list = [[str(value)] for value in new_row_list]
+
         # Add a new row below the last row containing the specified SKU
         sheet.insert_rows(new_row_list, last_row_index + 1)
 
         return {"message": "New size added"}
     else:
         return {"message": "No rows found for the specified SKU"}
-
