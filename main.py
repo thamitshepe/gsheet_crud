@@ -50,7 +50,8 @@ async def edit_shoe(
     # Find all the rows matching the specified "Shoe," "SKU," and optionally "Size"
     rows_to_update = []
     
-    for index, row in enumerate(all_rows, start=2):
+    all_records = sheet.get_all_records()
+    for index, row in enumerate(all_records, start=2):
         if row.get("Shoe") == shoe_name:
             if size:  # If "size" is provided in the request, consider it
                 if row.get("Size"):
