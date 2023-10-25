@@ -17,12 +17,24 @@ file = gspread.authorize(creds)
 workbook = file.open("Inventory")
 sheet = workbook.sheet1
 
+from fastapi import FastAPI, Query
+import gspread
+from oauth2client.service_account import ServiceAccountCredentials
+import typing
+
+app = FastAPI()
+
+# Initialize your Google Sheets client and open the desired spreadsheet (replace with your own credentials and spreadsheet ID)
+scope = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
+credentials = ServiceAccountCredentials.from_json_keyfile_name("your-credentials.json", scope)
+gc = gspread.authorize(credentials)
+spreadsheet = gc.open_by_key("your-spreadsheet-id")
+sheet = spreadsheet.get_worksheet(0)
+
 def size_to_string(size):
-    # Function to ensure size is always a string
     return str(size)
 
 def sku_to_string(sku):
-    # Function to ensure sku is always a string
     if isinstance(sku, list):
         return [str(s) for s in sku]
     else:
@@ -31,7 +43,7 @@ def sku_to_string(sku):
 @app.post("/edit-shoe")
 async def edit_shoe(
     shoe_name: str,
-    sku: typing.List[str],
+    sku: typing.Union[str, typing.List[str]],  # Accepts both single string and list
     size: typing.Optional[str] = Query(None, title="Optional: Size"),
     new_size: typing.Optional[str] = Query(None, title="Optional: New Size"),
     new_shoe_name: typing.Optional[str] = Query(None, title="Optional: New Shoe Name"),
