@@ -47,15 +47,27 @@ async def edit_shoe(
     # Ensure that sku is always treated as a string
     sku = sku_to_string(sku)
 
-    # Find all the rows matching the specified "Shoe," "SKU," and optionally "Size"
-    all_rows = sheet.get_all_records()
-    rows_to_update = []
-    
-    for index, row in enumerate(all_rows, start=2):
-        if row.get("Shoe") == shoe_name:
-            if (sku is None) or (sku_to_string(row.get("Sku")) == sku):
-                if (size is None) or (row.get("Size") and size_to_string(row.get("Size")) == size):
+# Find all the rows matching the specified "Shoe," "SKU," and optionally "Size"
+all_rows = sheet.get_all_records()
+rows_to_update = []
+
+for index, row in enumerate(all_rows, start=2):
+    if row.get("Shoe") == shoe_name:
+        if sku is not None and row.get("Sku") == sku:
+            if size is not None:
+                if row.get("Size") and size_to_string(row.get("Size")) == size:
                     # If it reaches this point, it means it matched Shoe, SKU, and Size (if specified)
+                    rows_to_update.append((index, row))
+                elif not row.get("Size") and size is None:
+                    # If "Size" is not specified in both request and row, consider it a match
+                    rows_to_update.append((index, row))
+        elif sku is None:
+            # When "SKU" is not specified, match rows based on "Shoe" and "Size" if provided
+            if size is not None:
+                if row.get("Size") and size_to_string(row.get("Size")) == size:
+                    rows_to_update.append((index, row))
+                elif not row.get("Size"):
+                    # If "Size" is not specified in both request and row, consider it a match
                     rows_to_update.append((index, row))
 
 
