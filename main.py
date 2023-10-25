@@ -45,8 +45,8 @@ async def edit_shoe(
     delete: typing.Optional[bool] = Query(False, title="Optional: Delete")
 ):
 
-    # Ensure that sku is always treated as a list of strings
-    skus = sku_to_string(sku)
+    if not isinstance(sku, list):
+        sku = [sku]  # Convert single SKU to a list for uniform handling
 
     # Find all the rows matching the specified "Shoe," "SKU," and optionally "Size"
     all_rows = sheet.get_all_records()
