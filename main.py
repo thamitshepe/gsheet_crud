@@ -18,18 +18,17 @@ workbook = file.open("Inventory")
 sheet = workbook.sheet1
 
 def size_to_string(size):
+    # Function to ensure size is always a string
     return str(size)
 
 def sku_to_string(sku):
-    if isinstance(sku, list):
-        return [str(s) for s in sku]
-    else:
-        return [str(sku)]
+    # Function to ensure sku is always a string
+    return str(sku)
 
 @app.post("/edit-shoe")
 async def edit_shoe(
     shoe_name: str,
-    sku: typing.Union[str, typing.List[str]],  # Accepts both single string and list
+    sku: str,
     size: typing.Optional[str] = Query(None, title="Optional: Size"),
     new_size: typing.Optional[str] = Query(None, title="Optional: New Size"),
     new_shoe_name: typing.Optional[str] = Query(None, title="Optional: New Shoe Name"),
@@ -45,15 +44,15 @@ async def edit_shoe(
     delete: typing.Optional[bool] = Query(False, title="Optional: Delete")
 ):
 
-    if not isinstance(sku, list):
-        sku = [sku]  # Convert single SKU to a list for uniform handling
+    # Ensure that sku is always treated as a string
+    sku = sku_to_string(sku)
 
     # Find all the rows matching the specified "Shoe," "SKU," and optionally "Size"
     all_rows = sheet.get_all_records()
     rows_to_update = []
 
     for index, row in enumerate(all_rows, start=2):
-        if row.get("Shoe") == shoe_name and row.get("Sku") in skus:
+        if row.get("Shoe") == shoe_name and sku_to_string(row.get("Sku")) == sku:
             if size:  # If "size" is provided in the request, consider it
                 if row.get("Size"):
                     size_from_sheets = size_to_string(row.get("Size"))
@@ -70,11 +69,11 @@ async def edit_shoe(
         if size:
             # Delete specific SKU and Size combination
             rows_to_delete = [index for index, row in enumerate(all_rows, start=2)
-                              if row.get("Sku") in skus and size_to_string(row.get("Size")) == size]
+                              if sku_to_string(row.get("Sku")) == sku and size_to_string(row.get("Size")) == size]
         else:
-            # Delete all rows with any of the specified SKUs
+            # Delete all rows with a specific SKU
             rows_to_delete = [index for index, row in enumerate(all_rows, start=2)
-                              if row.get("Sku") in skus]
+                              if sku_to_string(row.get("Sku")) == sku]
 
         if not rows_to_delete:
             return {"message": "No rows found for deletion"}
