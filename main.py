@@ -148,21 +148,31 @@ async def add_size(
             last_row_index = index
 
     if last_row_index is not None:
-        # Create a new row with the provided data
-        new_row = {
-            "Shoe": shoe_name,
-            "Sku": sku,
-            "Size": add_size,
-            "Complete": complete,
-            "Source": cur_source,
-            "Seller": cur_seller,
-            "Note": cur_note,
-            "Date": date,
-            "Cost": cost
-        }
+        # Get the header row (the row containing field names)
+        header_row = sheet.row_values(1)  # Assuming header row is the first row
 
-        # Ensure that the new row is a list of cells, where each cell is a string
-        new_row_list = [str(new_row.get(field, "")) for field in all_records[0]]
+        # Create a new row with the provided data
+        new_row = {}
+        new_row["Shoe"] = shoe_name
+        new_row["Sku"] = sku
+        new_row["Size"] = add_size
+        new_row["Complete"] = complete
+        new_row["Source"] = cur_source
+        new_row["Seller"] = cur_seller
+        new_row["Note"] = cur_note
+        new_row["Date"] = date
+        new_row["Cost"] = cost
+
+        # Create a list for the new row based on the header row order, while preserving unspecified and empty fields
+        new_row_list = []
+        for header in header_row:
+            if header in new_row:
+                new_row_list.append(new_row[header])
+            else:
+                new_row_list.append("")
+
+        # Ensure that the new row is a list of lists (list of cells, where each cell is a string)
+        new_row_list = [[str(value)] for value in new_row_list]
 
         # Add a new row below the last row containing the specified SKU
         sheet.insert_rows(new_row_list, last_row_index + 1)
@@ -170,4 +180,3 @@ async def add_size(
         return {"message": "New size added"}
     else:
         return {"message": "No rows found for the specified SKU"}
-
