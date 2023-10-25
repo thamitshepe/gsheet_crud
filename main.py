@@ -40,7 +40,8 @@ async def edit_shoe(
     listed: typing.Optional[bool] = Query(None, title="Optional: Listed"),
     source: typing.Optional[str] = Query(None, title="Optional: Source"),
     seller: typing.Optional[str] = Query(None, title="Optional: Seller"),
-    note: typing.Optional[str] = Query(None, title="Optional: Note")
+    note: typing.Optional[str] = Query(None, title="Optional: Note"),
+    delete: typing.Optional[bool] = Query(False, title="Optional: Delete")
 ):
 
     # Ensure that sku is always treated as a string
@@ -62,6 +63,22 @@ async def edit_shoe(
 
             # If it reaches this point, it means it matched Shoe, SKU, and Size (if specified)
             rows_to_update.append((index, row))
+
+    if delete:
+        rows_to_delete = []
+        for index, _ in rows_to_update:
+            rows_to_delete.append(index)
+
+        if not rows_to_delete:
+            return {"message": "No rows found for deletion"}
+
+        # Sort rows in descending order so that rows can be deleted without shifting indices
+        rows_to_delete.sort(reverse=True)
+
+        for index in rows_to_delete:
+            sheet.delete_rows(index)
+
+        return {"message": f"{len(rows_to_delete)} rows deleted"}
 
     if not rows_to_update:
         return {"message": "Shoe, SKU, and Size combination not found"}
@@ -92,8 +109,6 @@ async def edit_shoe(
             row["Seller"] = seller
         if note is not None:
             row["Note"] = note
-
-
 
         # Calculate the range for the specific row
         range_start = f"A{index}"
