@@ -2,6 +2,7 @@ from fastapi import FastAPI, Query
 from oauth2client.service_account import ServiceAccountCredentials
 import gspread
 import typing
+from typing import List, Union
 
 app = FastAPI()
 
@@ -28,7 +29,7 @@ def sku_to_string(sku):
 @app.post("/edit-shoe")
 async def edit_shoe(
     shoe_name: str,
-    sku: str,
+    sku: Union[str, List[str]],  # Accept a single SKU or a list of SKUs
     size: typing.Optional[str] = Query(None, title="Optional: Size"),
     new_size: typing.Optional[str] = Query(None, title="Optional: New Size"),
     new_shoe_name: typing.Optional[str] = Query(None, title="Optional: New Shoe Name"),
@@ -43,9 +44,15 @@ async def edit_shoe(
     note: typing.Optional[str] = Query(None, title="Optional: Note"),
     delete: typing.Optional[bool] = Query(False, title="Optional: Delete")
 ):
+    
+    # Ensure that sku is always treated as a list
+    if isinstance(sku, str):
+        sku = [sku]
 
-    # Ensure that sku is always treated as a string
-    sku = sku_to_string(sku)
+    # Ensure that new_sku is always treated as a string
+    if new_sku:
+        new_sku = sku_to_string(new_sku)
+
 
     # Find all the rows matching the specified "Shoe," "SKU," and optionally "Size"
     all_rows = sheet.get_all_records()
