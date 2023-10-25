@@ -67,45 +67,39 @@ async def edit_shoe(
     # Ensure that sku is always treated as a string
     sku = sku_to_string(sku)
 
-    # Find the first row (header row) of the sheet to get the column titles
-    header_row = sheet.row_values(1)
-
     # Construct the new row
-    new_row = {}
-    for field_name, field_value in {
-        "Shoe": shoe_name,
-        "Sku": sku,
-        "Cost": cost,
-        "Size": add_size,
-        "Complete": complete,
-        "Source": cur_source,
-        "Seller": cur_seller,
-        "Note": cur_note,
-        "Date": date
-    }.items():
-        if field_value is not None:
-            # Find the column name corresponding to the field name
-            column_name = field_to_column.get(field_name)
-            if column_name is not None:
-                # Find the index of the matching column title
-                column_index = header_row.index(column_name) + 1
-                new_row[column_index] = field_value
+    new_row = {
+        field_to_column[field_name]: field_value
+        for field_name, field_value in {
+            "Shoe": shoe_name,
+            "Sku": sku,
+            "Cost": cost,
+            "Size": add_size,
+            "Complete": complete,
+            "Source": cur_source,
+            "Seller": cur_seller,
+            "Note": cur_note,
+            "Date": date
+        }.items() if field_value is not None
+    }
 
     # Insert the new row if "add_size" and "cost" are provided
     if add_size is not None and cost is not None:
         # Find the last row with the same SKU
         last_row_index = None
-        for index, row in enumerate(sheet.get_all_records(), start=2):
-            if sku_to_string(row.get("Sku")) == sku:
+        cell_values = worksheet.col_values(2)  # Assuming SKU is in the second column (adjust if different)
+        for index, sku_value in enumerate(cell_values, start=1):
+            if sku_value == sku:
                 last_row_index = index
-
-        # Construct the new row based on the field names from the header row
-        new_row = {column_index: field_value for column_index, field_value in new_row.items()}
 
         # If a matching row is found, insert the new row immediately after it
         if last_row_index is not None:
-            sheet.insert_rows([list(new_row.get(column_index, "")) for column_index in range(1, len(header_row) + 1)], last_row_index + 1)
+            worksheet.insert_rows([new_row.get(column_name, "") for column_name in worksheet.row_values(1)], last_row_index + 1)
             return {"message": "New size added"}
+        else:
+            return {"message": "SKU not found"}
+
+    return {"message": "add_size and cost are required for the operation"}
 
     # Rest of the code for updating and deleting rows
     all_rows = sheet.get_all_records()
