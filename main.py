@@ -23,12 +23,15 @@ def size_to_string(size):
 
 def sku_to_string(sku):
     # Function to ensure sku is always a string
-    return str(sku)
+    if isinstance(sku, list):
+        return [str(s) for s in sku]
+    else:
+        return [str(sku)]
 
 @app.post("/edit-shoe")
 async def edit_shoe(
     shoe_name: str,
-    sku: str,
+    sku: typing.Union[str, list],  # Accepts both single string and list
     size: typing.Optional[str] = Query(None, title="Optional: Size"),
     new_size: typing.Optional[str] = Query(None, title="Optional: New Size"),
     new_shoe_name: typing.Optional[str] = Query(None, title="Optional: New Shoe Name"),
@@ -44,15 +47,15 @@ async def edit_shoe(
     delete: typing.Optional[bool] = Query(False, title="Optional: Delete")
 ):
 
-    # Ensure that sku is always treated as a string
-    sku = sku_to_string(sku)
+    # Ensure that sku is always treated as a list of strings
+    skus = sku_to_string(sku)
 
     # Find all the rows matching the specified "Shoe," "SKU," and optionally "Size"
     all_rows = sheet.get_all_records()
     rows_to_update = []
 
     for index, row in enumerate(all_rows, start=2):
-        if row.get("Shoe") == shoe_name and sku_to_string(row.get("Sku")) == sku:
+        if row.get("Shoe") == shoe_name and row.get("Sku") in skus:
             if size:  # If "size" is provided in the request, consider it
                 if row.get("Size"):
                     size_from_sheets = size_to_string(row.get("Size"))
@@ -69,11 +72,11 @@ async def edit_shoe(
         if size:
             # Delete specific SKU and Size combination
             rows_to_delete = [index for index, row in enumerate(all_rows, start=2)
-                              if sku_to_string(row.get("Sku")) == sku and size_to_string(row.get("Size")) == size]
+                              if row.get("Sku") in skus and size_to_string(row.get("Size")) == size]
         else:
-            # Delete all rows with a specific SKU
+            # Delete all rows with any of the specified SKUs
             rows_to_delete = [index for index, row in enumerate(all_rows, start=2)
-                              if sku_to_string(row.get("Sku")) == sku]
+                              if row.get("Sku") in skus]
 
         if not rows_to_delete:
             return {"message": "No rows found for deletion"}
