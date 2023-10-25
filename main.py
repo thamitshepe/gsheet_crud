@@ -55,31 +55,40 @@ async def edit_shoe(
     sku = sku_to_string(sku)
 
 
-    # Define a mapping of field names to column titles
-    column_mapping = {
-        "Shoe": "Shoe",
-        "Sku": "Sku",
-        "Cost": "Cost",
-        "Size": "Size",
-        "Complete": "Complete",
-        "Source": "Source",
-        "Seller": "Seller",
-        "Note": "Note",
-        "Date": "Date"
-    }
+    # Find the first row (header row) of the sheet to get the column titles
+    header_row = sheet.row_values(1)
     
-    # Construct the new row based on the field names
-    new_row = {column_mapping[field_name]: field_value for field_name, field_value in {
-        "Shoe": shoe_name,
-        "Sku": sku,
-        "Cost": cost,
+    # Construct the new row
+    new_row = {}
+    for field_name, field_value in {
+        "Shoe": new_shoe_name,
+        "Sku": new_sku,
+        "Cost": new_cost,
         "Size": add_size,
         "Complete": complete,
         "Source": cur_source,
         "Seller": cur_seller,
         "Note": cur_note,
         "Date": date
-    }.items() if field_value is not None}
+    }.items():
+        if field_value is not None:
+            # Find the index of the matching column title
+            column_index = header_row.index(field_name) + 1
+            new_row[column_index] = field_value
+
+# Insert the new row if "add_size" and "cost" are provided
+if add_size is not None and cost is not None:
+    # Find the last row with the same SKU
+    last_row_index = None
+    for index, row in enumerate(sheet.get_all_records(), start=2):
+        if sku_to_string(row.get("Sku")) == sku:
+            last_row_index = index
+
+    # If a matching row is found, insert the new row immediately after it
+    if last_row_index is not None:
+        sheet.insert_rows([list(new_row.values())], last_row_index + 1)
+        return {"message": "New size added"}
+
 
     
     # Insert a new row if "add_size" and "cost" are provided
