@@ -28,7 +28,7 @@ def sku_to_string(sku):
 @app.post("/edit-shoe")
 async def edit_shoe(
     shoe_name: str,
-    sku: typing.Optional[str] = Query(None, title="Optional: SKU"),
+    sku: str,
     size: typing.Optional[str] = Query(None, title="Optional: Size"),
     new_size: typing.Optional[str] = Query(None, title="Optional: New Size"),
     new_shoe_name: typing.Optional[str] = Query(None, title="Optional: New Shoe Name"),
@@ -52,23 +52,17 @@ async def edit_shoe(
     rows_to_update = []
 
     for index, row in enumerate(all_rows, start=2):
-        if row.get("Shoe") == shoe_name:
-            if sku is not None and row.get("Sku") == sku:
-                if size is not None:
-                    if row.get("Size") and size_to_string(row.get("Size")) == size:
-                        # If it reaches this point, it means it matched Shoe, SKU, and Size (if specified)
-                        rows_to_update.append((index, row))
-                    elif not row.get("Size") and size is None:
-                        # If "Size" is not specified in both request and row, consider it a match
-                        rows_to_update.append((index, row))
-            elif sku is None:
-                # When "SKU" is not specified, match rows based on "Shoe" and "Size" if provided
-                if size is not None:
-                    if row.get("Size") and size_to_string(row.get("Size")) == size:
-                        rows_to_update.append((index, row))
-                    elif not row.get("Size"):
-                        # If "Size" is not specified in both request and row, consider it a match
-                        rows_to_update.append((index, row))
+        if row.get("Shoe") == shoe_name and sku_to_string(row.get("Sku")) == sku:
+            if size:  # If "size" is provided in the request, consider it
+                if row.get("Size"):
+                    size_from_sheets = size_to_string(row.get("Size"))
+                    if size != size_from_sheets:
+                        continue
+                else:
+                    continue
+
+            # If it reaches this point, it means it matched Shoe, SKU, and Size (if specified)
+            rows_to_update.append((index, row))
 
     if delete:
         rows_to_delete = []
@@ -82,7 +76,7 @@ async def edit_shoe(
                               if sku_to_string(row.get("Sku")) == sku]
 
         if not rows_to_delete:
-            return {"message": "No rows found for deletion"}  # This 'return' is now inside the 'if delete' block
+            return {"message": "No rows found for deletion"}
 
         # Sort rows in descending order so that rows can be deleted without shifting indices
         rows_to_delete.sort(reverse=True)
@@ -127,7 +121,7 @@ async def edit_shoe(
         range_end = chr(ord("A") + len(row) - 1) + str(index)
         sheet.update(range_start + ":" + range_end, [list(row.values())], value_input_option="RAW")
 
-    return {"message": "Cells updated"}  # This 'return' is outside the 'for' loop
+    return {"message": "Cells updated"}
 
 @app.post("/add-size")
 async def add_size(
@@ -149,7 +143,7 @@ async def add_size(
     all_records = sheet.get_all_records()
     last_row_index = None
 
-    for index, row in enumerate all_records, start=2):
+    for index, row in enumerate(all_records, start=2):
         if sku_to_string(row.get("Sku")) == sku:
             last_row_index = index
 
