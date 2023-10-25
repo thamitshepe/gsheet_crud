@@ -162,7 +162,7 @@ async def add_size(
         }
 
         # Ensure that the new row is a list of cells, where each cell is a string
-        new_row_list = [str(value) for value in new_row.values()]
+        new_row_list = [str(new_row.get(field, "")) for field in all_records[0]]
 
         # Add a new row below the last row containing the specified SKU
         sheet.insert_rows(new_row_list, last_row_index + 1)
