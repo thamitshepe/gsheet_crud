@@ -55,7 +55,7 @@ async def edit_shoe(
     sku = sku_to_string(sku)
 
 
-        # Define a mapping of field names to column titles
+    # Define a mapping of field names to column titles
     column_mapping = {
         "Shoe": "Shoe",
         "Sku": "Sku",
@@ -68,17 +68,19 @@ async def edit_shoe(
         "Date": "Date"
     }
     
-   # Construct the new row based on the field names
-    new_row = {}
-    new_row["Shoe"] = shoe_name
-    new_row["Sku"] = sku
-    new_row["Cost"] = cost
-    new_row["Size"] = add_size
-    new_row["Complete"] = complete
-    new_row["Source"] = cur_source
-    new_row["Seller"] = cur_seller
-    new_row["Note"] = cur_note
-    new_row["Date"] = date
+    # Construct the new row based on the field names
+    new_row = {column_mapping[field_name]: field_value for field_name, field_value in {
+        "Shoe": new_shoe_name,
+        "Sku": new_sku,
+        "Cost": new_cost,
+        "Size": add_size,
+        "Complete": complete,
+        "Source": cur_source,
+        "Seller": cur_seller,
+        "Note": cur_note,
+        "Date": date
+    }.items() if field_value is not None}
+
     
     # Insert a new row if "add_size" and "cost" are provided
     if add_size is not None and cost is not None:
