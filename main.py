@@ -77,11 +77,11 @@ async def edit_shoe(
         rows_to_delete = []
         if size:
             # Delete specific SKU and Size combination
-            rows_to_delete = [index for index, row in enumerate(all_rows, start=2)
+            rows_to_delete = [index for index, row in enumerate(all_records, start=2)
                               if sku_to_string(row.get("Sku")) == sku and size_to_string(row.get("Size")) == size]
         else:
             # Delete all rows with a specific SKU
-            rows_to_delete = [index for index, row in enumerate(all_rows, start=2)
+            rows_to_delete = [index for index, row in enumerate(all_records, start=2)
                               if sku_to_string(row.get("Sku")) == sku]
 
         if not rows_to_delete:
