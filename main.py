@@ -70,10 +70,9 @@ async def edit_shoe(
     # Find the first row (header row) of the sheet to get the column titles
     header_row = sheet.row_values(1)
 
-    # Construct the new row as a list of empty strings
-    new_row = [""] * len(header_row)
+    # Construct the new row
+    new_row = ["" for _ in range(len(header_row))]  # Initialize with empty strings
 
-    # Fill in the new_row list with data for the fields that have values
     for field_name, field_value in {
         "Shoe": shoe_name,
         "Sku": sku,
@@ -87,9 +86,12 @@ async def edit_shoe(
         "Date": date
     }.items():
         if field_value is not None:
-            # Find the index of the matching column title
-            column_index = header_row.index(field_name)
-            new_row[column_index] = field_value
+            # Find the column name corresponding to the field name
+            column_name = field_to_column.get(field_name)
+            if column_name is not None:
+                # Find the index of the matching column title
+                column_index = header_row.index(column_name)
+                new_row[column_index] = field_value
 
     # Insert the new row if "add_size" and "cost" are provided
     if add_size is not None and cost is not None:
@@ -101,7 +103,7 @@ async def edit_shoe(
 
         # If a matching row is found, insert the new row immediately after it
         if last_row_index is not None:
-            sheet.insert_rows(new_row, last_row_index + 1)
+            sheet.insert_rows([new_row], last_row_index + 1)
             return {"message": "New size added"}
 
     return {"message": "add_size and cost are required for the operation"}
