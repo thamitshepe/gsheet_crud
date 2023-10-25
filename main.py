@@ -7,7 +7,7 @@ app = FastAPI()
 
 scopes = [
     'https://www.googleapis.com/auth/spreadsheets',
-    'https.googleapis.com/auth/drive'
+    'https://www.googleapis.com/auth/drive'
 ]
 
 # Load Google Sheets credentials
@@ -50,12 +50,13 @@ async def edit_shoe(
     cur_note: typing.Optional[str] = Query(None, title="Optional: Current Note"),
     date: typing.Optional[str] = Query(None, title="Optional: Date")
 ):
+
     # Ensure that sku is always treated as a string
     sku = sku_to_string(sku)
 
     # Find the first row (header row) of the sheet to get the column titles
     header_row = sheet.row_values(1)
-    
+
     # Construct the new row
     new_row = {}
     for field_name, field_value in {
