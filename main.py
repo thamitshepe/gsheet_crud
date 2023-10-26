@@ -227,7 +227,7 @@ async def add_sku(
         new_row[column_mapping["Cost"]] = cost
 
         # Insert a new row right after the last row containing the specified Shoe
-        sheet.insert_rows([new_row], last_row_index + 2)
+        sheet.insert_rows([new_row], last_row_index + 1)
 
         return {"message": "New SKU added"}
     else:
