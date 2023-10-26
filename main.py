@@ -183,3 +183,53 @@ async def add_size(
         return {"message": "New size added"}
     else:
         return {"message": "No rows found for the specified SKU"}
+
+@app.post("/add-sku")
+async def add_sku(
+    shoe_name: str,
+    add_sku: typing.Optional[str] = Query(None, title="SKU"),
+    complete: typing.Optional[str] = Query(None, title="Complete"),
+    cur_source: typing.Optional[str] = Query(None, title="Source"),
+    cur_seller: typing.Optional[str] = Query(None, title="Seller"),
+    cur_note: typing.Optional[str] = Query(None, title="Note"),
+    date: typing.Optional[str] = Query(None, title="Date"),
+    cost: typing.Optional[str] = Query(None, title="Cost")
+):
+    # Ensure that add_sku is always treated as a string
+    add_sku = sku_to_string(add_sku)
+
+    # Find the last row containing the specified Shoe
+    all_records = sheet.get_all_records()
+    last_row_index = None
+
+    for index, row in enumerate(reversed(all_records), start=2):
+        if row.get("Shoe") == shoe_name:
+            last_row_index = len(all_records) - index + 1
+            break
+
+    if last_row_index is not None:
+        # Get the header row (the row containing field names)
+        header_row = sheet.row_values(1)  # Assuming header row is the first row
+
+        # Create a dictionary to map column names to their respective index
+        column_mapping = {header: index for index, header in enumerate(header_row)}
+
+        # Create a new row with the provided data
+        new_row = [""] * len(header_row)  # Initialize a list with empty values
+
+        # Map the data to the appropriate columns
+        new_row[column_mapping["Shoe"]] = shoe_name
+        new_row[column_mapping["Sku"]] = add_sku  # Use the provided SKU
+        new_row[column_mapping["Complete"]] = complete
+        new_row[column_mapping["Source"]] = cur_source
+        new_row[column_mapping["Seller"]] = cur_seller
+        new_row[column_mapping["Note"]] = cur_note
+        new_row[column_mapping["Date"]] = date
+        new_row[column_mapping["Cost"]] = cost
+
+        # Insert a new row right after the last row containing the specified Shoe
+        sheet.insert_rows([new_row], last_row_index + 2)
+
+        return {"message": "New SKU added"}
+    else:
+        return {"message": "No rows found for the specified Shoe"}
