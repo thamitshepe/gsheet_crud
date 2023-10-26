@@ -202,10 +202,9 @@ async def add_sku(
     all_records = sheet.get_all_records()
     last_row_index = None
 
-    for index, row in enumerate(reversed(all_records), start=2):
+    for index, row in enumerate((all_records), start=2):
         if row.get("Shoe") == shoe_name:
-            last_row_index = len(all_records) - index + 1
-            break
+            last_row_index = index
 
     if last_row_index is not None:
         # Get the header row (the row containing field names)
