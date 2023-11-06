@@ -52,7 +52,7 @@ async def edit_shoe(
     
     all_records = sheet.get_all_records()
     for index, row in enumerate(all_records, start=2):
-        if row.get("Shoe") == shoe_name:
+        if row.get("Name") == shoe_name:
             if size:  # If "size" is provided in the request, consider it
                 if row.get("Size"):
                     size_from_sheets = size_to_string(row.get("Size"))
@@ -96,14 +96,14 @@ async def edit_shoe(
         return {"message": f"{len(rows_to_delete)} rows deleted"}
 
     if not rows_to_update:
-        return {"message": "Shoe, SKU, and Size combination not found"}
+        return {"message": "Name, SKU, and Size combination not found"}
 
     for index, row in rows_to_update:
         # Update the columns based on the provided values
         if new_size is not None:
             row["Size"] = new_size
         if new_shoe_name is not None:
-            row["Shoe"] = new_shoe_name
+            row["Name"] = new_shoe_name
         if new_sku is not None:
             row["Sku"] = sku_to_string(new_sku)  # Ensure new_sku is treated as a string
         if new_cost is not None:
@@ -167,7 +167,7 @@ async def add_size(
         new_row = [""] * len(header_row)  # Initialize a list with empty values
 
         # Map the data to the appropriate columns
-        new_row[column_mapping["Shoe"]] = shoe_name
+        new_row[column_mapping["Name"]] = shoe_name
         new_row[column_mapping["Sku"]] = sku
         new_row[column_mapping["Size"]] = add_size
         new_row[column_mapping["Complete"]] = complete
@@ -203,7 +203,7 @@ async def add_sku(
     last_row_index = None
 
     for index, row in enumerate((all_records), start=2):
-        if row.get("Shoe") == shoe_name:
+        if row.get("Name") == shoe_name:
             last_row_index = index
 
     if last_row_index is not None:
@@ -217,7 +217,7 @@ async def add_sku(
         new_row = [""] * len(header_row)  # Initialize a list with empty values
 
         # Map the data to the appropriate columns
-        new_row[column_mapping["Shoe"]] = shoe_name
+        new_row[column_mapping["Name"]] = shoe_name
         new_row[column_mapping["Sku"]] = add_sku  # Use the provided SKU
         new_row[column_mapping["Complete"]] = complete
         new_row[column_mapping["Source"]] = cur_source
