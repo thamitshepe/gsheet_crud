@@ -145,8 +145,7 @@ async def add_size(
     cur_seller: typing.Optional[str] = Query(None, title="Seller"),
     cur_note: typing.Optional[str] = Query(None, title="Note"),
     date: typing.Optional[str] = Query(None, title="Date"),
-    price_paid: typing.Optional[str] = Query(None, title="Price Paid"),
-    cost: typing.Optional[str] = Query(None, title="Cost")
+    price_paid: typing.Optional[str] = Query(None, title="Price Paid")
 ):
     # Ensure that sku and add_size are always treated as strings
     sku = sku_to_string(sku)
@@ -179,7 +178,6 @@ async def add_size(
         new_row[column_mapping["Seller"]] = cur_seller
         new_row[column_mapping["Notes"]] = cur_note
         new_row[column_mapping["Price Paid"]] = price_paid
-        new_row[column_mapping["Cost"]] = cost
 
         # Insert a new row right after the last row containing the specified SKU
         sheet.insert_rows([new_row], last_row_index + 1)
