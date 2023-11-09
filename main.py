@@ -33,9 +33,10 @@ async def edit_shoe(
     new_size: typing.Optional[str] = Query(None, title="Optional: New Size"),
     new_shoe_name: typing.Optional[str] = Query(None, title="Optional: New Shoe Name"),
     new_sku: typing.Optional[str] = Query(None, title="Optional: New SKU"),
-    new_cost: typing.Optional[str] = Query(None, title="Optional: New Cost"),
+    new_price_paid: typing.Optional[str] = Query(None, title="Optional: New Cost"),
     new_quantity: typing.Optional[str] = Query(None, title="Optional: New Quantity"),
     new_list_price: typing.Optional[str] = Query(None, title="Optional: New List Price"),
+    cost: typing.Optional[str] = Query(None, title="Optional: Cost"),
     new_condition: typing.Optional[str] = Query(None, title="Optional: New Condition"),
     listed: typing.Optional[bool] = Query(None, title="Optional: Listed"),
     source: typing.Optional[str] = Query(None, title="Optional: Source"),
@@ -106,14 +107,16 @@ async def edit_shoe(
             row["Model"] = new_shoe_name
         if new_sku is not None:
             row["Sku"] = sku_to_string(new_sku)  # Ensure new_sku is treated as a string
-        if new_cost is not None:
-            row["Price Paid"] = new_cost
+        if new_price_paid is not None:
+            row["Price Paid"] = new_price_paid
         if new_quantity is not None:
             row["Quantity"] = new_quantity
         if new_condition is not None:
             row["Grade"] = new_condition
         if new_list_price is not None:
             row["List Price"] = new_list_price
+        if cost is not None:
+            row["Cost"] = cost
         if listed is not True:
             row["Listed"] = True
         else:
@@ -142,6 +145,7 @@ async def add_size(
     cur_seller: typing.Optional[str] = Query(None, title="Seller"),
     cur_note: typing.Optional[str] = Query(None, title="Note"),
     date: typing.Optional[str] = Query(None, title="Date"),
+    price_paid: typing.Optional[str] = Query(None, title="Price Paid"),
     cost: typing.Optional[str] = Query(None, title="Cost")
 ):
     # Ensure that sku and add_size are always treated as strings
@@ -174,7 +178,8 @@ async def add_size(
         new_row[column_mapping["Source"]] = cur_source
         new_row[column_mapping["Seller"]] = cur_seller
         new_row[column_mapping["Notes"]] = cur_note
-        new_row[column_mapping["Price Paid"]] = cost
+        new_row[column_mapping["Price Paid"]] = price_paid
+        new_row[column_mapping["Cost"]] = cost
 
         # Insert a new row right after the last row containing the specified SKU
         sheet.insert_rows([new_row], last_row_index + 1)
