@@ -14,7 +14,7 @@ scopes = [
 creds = ServiceAccountCredentials.from_json_keyfile_name("secretkey.json", scopes=scopes)
 
 file = gspread.authorize(creds)
-workbook = file.open("Inventory")
+workbook = file.open("WholeCell Inventory Template")
 sheet = workbook.sheet1
 
 def size_to_string(size):
@@ -52,10 +52,10 @@ async def edit_shoe(
     
     all_records = sheet.get_all_records()
     for index, row in enumerate(all_records, start=2):
-        if row.get("Name") == shoe_name:
+        if row.get("Model") == shoe_name:
             if size:  # If "size" is provided in the request, consider it
-                if row.get("Size"):
-                    size_from_sheets = size_to_string(row.get("Size"))
+                if row.get("Capacity"):
+                    size_from_sheets = size_to_string(row.get("Capacity"))
                     if size != size_from_sheets:
                         continue
                 else:
@@ -78,7 +78,7 @@ async def edit_shoe(
         if size:
             # Delete specific SKU and Size combination
             rows_to_delete = [index for index, row in enumerate(all_records, start=2)
-                              if sku_to_string(row.get("Sku")) == sku and size_to_string(row.get("Size")) == size]
+                              if sku_to_string(row.get("Sku")) == sku and size_to_string(row.get("Capacity")) == size]
         else:
             # Delete all rows with a specific SKU
             rows_to_delete = [index for index, row in enumerate(all_records, start=2)
@@ -101,17 +101,17 @@ async def edit_shoe(
     for index, row in rows_to_update:
         # Update the columns based on the provided values
         if new_size is not None:
-            row["Size"] = new_size
+            row["Capacity"] = new_size
         if new_shoe_name is not None:
-            row["Name"] = new_shoe_name
+            row["Model"] = new_shoe_name
         if new_sku is not None:
             row["Sku"] = sku_to_string(new_sku)  # Ensure new_sku is treated as a string
         if new_cost is not None:
-            row["Cost"] = new_cost
+            row["Price Paid"] = new_cost
         if new_quantity is not None:
             row["Quantity"] = new_quantity
         if new_condition is not None:
-            row["Condition"] = new_condition
+            row["Grade"] = new_condition
         if new_list_price is not None:
             row["List Price"] = new_list_price
         if listed is not True:
@@ -123,7 +123,7 @@ async def edit_shoe(
         if seller is not None:
             row["Seller"] = seller
         if note is not None:
-            row["Note"] = note
+            row["Notes"] = note
 
         # Calculate the range for the specific row
         range_start = f"A{index}"
@@ -167,15 +167,14 @@ async def add_size(
         new_row = [""] * len(header_row)  # Initialize a list with empty values
 
         # Map the data to the appropriate columns
-        new_row[column_mapping["Name"]] = shoe_name
+        new_row[column_mapping["Model"]] = shoe_name
         new_row[column_mapping["Sku"]] = sku
-        new_row[column_mapping["Size"]] = add_size
+        new_row[column_mapping["Capacity"]] = add_size
         new_row[column_mapping["Complete"]] = complete
         new_row[column_mapping["Source"]] = cur_source
         new_row[column_mapping["Seller"]] = cur_seller
-        new_row[column_mapping["Note"]] = cur_note
-        new_row[column_mapping["Date"]] = date
-        new_row[column_mapping["Cost"]] = cost
+        new_row[column_mapping["Notes"]] = cur_note
+        new_row[column_mapping["Price Paid"]] = cost
 
         # Insert a new row right after the last row containing the specified SKU
         sheet.insert_rows([new_row], last_row_index + 1)
@@ -203,7 +202,7 @@ async def add_sku(
     last_row_index = None
 
     for index, row in enumerate((all_records), start=2):
-        if row.get("Name") == shoe_name:
+        if row.get("Model") == shoe_name:
             last_row_index = index
 
     if last_row_index is not None:
@@ -217,14 +216,13 @@ async def add_sku(
         new_row = [""] * len(header_row)  # Initialize a list with empty values
 
         # Map the data to the appropriate columns
-        new_row[column_mapping["Name"]] = shoe_name
+        new_row[column_mapping["Model"]] = shoe_name
         new_row[column_mapping["Sku"]] = add_sku  # Use the provided SKU
         new_row[column_mapping["Complete"]] = complete
         new_row[column_mapping["Source"]] = cur_source
         new_row[column_mapping["Seller"]] = cur_seller
-        new_row[column_mapping["Note"]] = cur_note
-        new_row[column_mapping["Date"]] = date
-        new_row[column_mapping["Cost"]] = cost
+        new_row[column_mapping["Notes"]] = cur_note
+        new_row[column_mapping["Price Paid"]] = cost
 
         # Insert a new row right after the last row containing the specified Shoe
         sheet.insert_rows([new_row], last_row_index + 1)
