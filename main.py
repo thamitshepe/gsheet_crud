@@ -52,30 +52,30 @@ async def edit_shoe(
     delete: typing.Optional[bool] = Query(False, title="Optional: Delete")
 ):
 
-sku = sku_to_string(sku)
+    sku = sku_to_string(sku)
 
-rows_to_update = []
+    rows_to_update = []
 
-all_records = sheet1.get_all_records()
-for index, row in enumerate(all_records, start=2):
-    if row.get("Model") == shoe_name:
-        if size:
-            if row.get("Capacity"):
-                size_from_sheets = size_to_string(row.get("Capacity"))
-                if size != size_from_sheets:
+    all_records = sheet1.get_all_records()
+    for index, row in enumerate(all_records, start=2):
+        if row.get("Model") == shoe_name:
+            if size:
+                if row.get("Capacity"):
+                    size_from_sheets = size_to_string(row.get("Capacity"))
+                    if size != size_from_sheets:
+                        continue
+                else:
                     continue
-            else:
-                continue
 
-        if sku:
-            if row.get("Sku"):
-                sku_from_sheets = sku_to_string(row.get("Sku"))
-                if sku != sku_from_sheets:
+            if sku:
+                if row.get("Sku"):
+                    sku_from_sheets = sku_to_string(row.get("Sku"))
+                    if sku != sku_from_sheets:
+                        continue
+                else:
                     continue
-            else:
-                continue
 
-        rows_to_update.append((index, row))
+            rows_to_update.append((index, row))
 
     if delete:
         rows_to_delete_sheet1 = []
@@ -83,6 +83,8 @@ for index, row in enumerate(all_records, start=2):
 
         if size:
             rows_to_delete_sheet1 = [index for index, row in enumerate(all_records_sheet1, start=2)
+                                      if sku_to_string(row.get("Sku")) == sku and size_to_string(row.get("Capacity")) == size]
+            rows_to_delete_sheet2 = [index for index, row in enumerate(all_records_sheet2, start=2)
                                       if sku_to_string(row.get("Sku")) == sku and size_to_string(row.get("Capacity")) == size]
         else:
             rows_to_delete_sheet1 = [index for index, row in enumerate(all_records_sheet1, start=2)
