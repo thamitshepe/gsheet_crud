@@ -57,6 +57,14 @@ async def edit_shoe(
 
     rows_to_update = []
 
+    # Fetch the header row for sheet1
+    header_row_sheet1 = sheet1.row_values(1)
+    column_index_sheet1 = {header_row_sheet1[i]: i for i in range(len(header_row_sheet1))}
+
+    # Fetch the header row for sheet2
+    header_row_sheet2 = sheet2.row_values(1)
+    column_index_sheet2 = {header_row_sheet2[i]: i for i in range(len(header_row_sheet2))}
+
     all_records_sheet1 = sheet1.get_all_records()
     all_records_sheet2 = sheet2.get_all_records()
 
@@ -118,35 +126,35 @@ async def edit_shoe(
 
         # Update logic for sheet1
         if new_size is not None:
-            row_sheet1[row_columns.index("Capacity")] = new_size
+            row[column_index_sheet1.get("Capacity")] = new_size
         if new_shoe_name is not None:
-            row_sheet1[row_columns.index("Model")] = new_shoe_name
+            row[column_index_sheet1.get("Model")] = new_shoe_name
         if new_sku is not None:
-            row_sheet1[row_columns.index("Sku")] = sku_to_string(new_sku)
+            row[column_index_sheet1.get("Sku")] = sku_to_string(new_sku)
         if new_price_paid is not None:
-            row_sheet1[row_columns.index("Price Paid")] = new_price_paid
+            row[column_index_sheet1.get("Price Paid")] = new_price_paid
         if new_quantity is not None:
-            row_sheet1[row_columns.index("Quantity")] = new_quantity
+            row[column_index_sheet1.get("Quantity")] = new_quantity
         if new_condition is not None:
-            row_sheet1[row_columns.index("Grade")] = new_condition
+            row[column_index_sheet1.get("Grade")] = new_condition
         if new_list_price is not None:
-            row_sheet1[row_columns.index("List Price")] = new_list_price
+            row[column_index_sheet1.get("List Price")] = new_list_price
         if cost is not None:
-            row_sheet1[row_columns.index("Cost")] = cost
+            row[column_index_sheet1.get("Cost")] = cost
         if status is not None:
-            row_sheet1[row_columns.index("Status")] = status
+            row[column_index_sheet1.get("Status")] = status
         if listed is not None:
-            row_sheet1[row_columns.index("Listed")] = listed
+            row[column_index_sheet1.get("Listed")] = listed
         if source is not None:
-            row_sheet1[row_columns.index("Source")] = source
+            row[column_index_sheet1.get("Source")] = source
         if new_manufacturer is not None:
-            row_sheet1[row_columns.index("Manufacturer")] = new_manufacturer
+            row[column_index_sheet1.get("Manufacturer")] = new_manufacturer
         if seller is not None:
-            row_sheet1[row_columns.index("Seller")] = seller
+            row[column_index_sheet1.get("Seller")] = seller
         if note is not None:
-            row_sheet1[row_columns.index("Notes")] = note
+            row[column_index_sheet1.get("Notes")] = note
         if new_damages is not None:
-            row_sheet1[row_columns.index("Damages")] = new_damages
+            row[column_index_sheet1.get("Damages")] = new_damages
 
         # Calculate the range for the specific row in the first sheet
         range_start_sheet1 = f"A{index}"
@@ -159,19 +167,19 @@ async def edit_shoe(
 
         # Update logic for sheet2
         if new_size is not None:
-            row_sheet2[row_columns.index("Capacity")] = new_size
+            row[column_index_sheet2.get("Capacity")] = new_size
         if new_shoe_name is not None:
-            row_sheet2[row_columns.index("Model")] = new_shoe_name
+            row[column_index_sheet2.get("Model")] = new_shoe_name
         if new_sku is not None:
-            row_sheet2[row_columns.index("Sku")] = sku_to_string(new_sku)
+            row[column_index_sheet2.get("Sku")] = sku_to_string(new_sku)
         if new_condition is not None:
-            row_sheet2[row_columns.index("Grade")] = new_condition
+            row[column_index_sheet2.get("Grade")] = new_condition
         if new_manufacturer is not None:
-            row_sheet2[row_columns.index("Manufacturer")] = new_manufacturer
+            row[column_index_sheet2.get("Manufacturer")] = new_manufacturer
         if new_damages is not None:
-            row_sheet2[row_columns.index("Damages")] = new_damages
+            row[column_index_sheet2.get("Damages")] = new_damages
         if new_code is not None:
-            row_sheet2[row_columns.index("Code")] = new_code
+            row[column_index_sheet2.get("Code")] = new_code
 
         # Calculate the range for the specific row in the second sheet
         range_start_sheet2 = f"A{index}"
