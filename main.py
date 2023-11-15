@@ -10,20 +10,41 @@ scopes = [
     'https://www.googleapis.com/auth/drive'
 ]
 
-# Load Google Sheets credentials
-creds = ServiceAccountCredentials.from_json_keyfile_name("secretkey.json", scopes=scopes)
+# Load Google Sheets credentials for the first sheet
+creds_sheet1 = ServiceAccountCredentials.from_json_keyfile_name("secretkey_sheet1.json", scopes=scopes)
+file_sheet1 = gspread.authorize(creds_sheet1)
+workbook_sheet1 = file_sheet1.open("Sheet1")  # Change to the actual name of your first sheet
+sheet1 = workbook_sheet1.sheet1
 
-file = gspread.authorize(creds)
-workbook = file.open("WholeCell Inventory Template")
-sheet = workbook.sheet1
+# Load Google Sheets credentials for the second sheet
+creds_sheet2 = ServiceAccountCredentials.from_json_keyfile_name("secretkey_sheet2.json", scopes=scopes)
+file_sheet2 = gspread.authorize(creds_sheet2)
+workbook_sheet2 = file_sheet2.open("Sheet2")  # Change to the actual name of your second sheet
+sheet2 = workbook_sheet2.sheet1
 
 def size_to_string(size):
-    # Function to ensure size is always a string
     return str(size)
 
 def sku_to_string(sku):
-    # Function to ensure sku is always a string
     return str(sku)
+
+def update_row(sheet, index, row):
+    range_start = f"A{index}"
+    range_end = chr(ord("A") + len(row) - 1) + str(index)
+    sheet.update(range_start + ":" + range_end, [list(row.values())], value_input_option="RAW")
+
+def add_new_row(sheet, shoe_name, add_sku, complete, cur_source, cur_seller, cur_note, date, cost):
+    header_row = sheet.row_values(1)
+    column_mapping = {header: index for index, header in enumerate(header_row)}
+    new_row = [""] * len(header_row)
+    new_row[column_mapping["Model"]] = shoe_name
+    new_row[column_mapping["Sku"]] = add_sku
+    new_row[column_mapping["Complete"]] = complete
+    new_row[column_mapping["Source"]] = cur_source
+    new_row[column_mapping["Seller"]] = cur_seller
+    new_row[column_mapping["Notes"]] = cur_note
+    new_row[column_mapping["Price Paid"]] = cost
+    sheet.append_row(new_row)
 
 @app.post("/edit-shoe")
 async def edit_shoe(
@@ -46,54 +67,47 @@ async def edit_shoe(
     delete: typing.Optional[bool] = Query(False, title="Optional: Delete")
 ):
 
-    # Ensure that sku is always treated as a string
     sku = sku_to_string(sku)
 
-    # Find all the rows matching the specified "Shoe," "SKU," and optionally "Size"
     rows_to_update = []
-    
-    all_records = sheet.get_all_records()
+
+    all_records = sheet1.get_all_records()
     for index, row in enumerate(all_records, start=2):
         if row.get("Model") == shoe_name:
-            if size:  # If "size" is provided in the request, consider it
+            if size:
                 if row.get("Capacity"):
                     size_from_sheets = size_to_string(row.get("Capacity"))
                     if size != size_from_sheets:
                         continue
                 else:
                     continue
-    
-            if sku:  # If "sku" is provided in the request, consider it
+
+            if sku:
                 if row.get("Sku"):
                     sku_from_sheets = sku_to_string(row.get("Sku"))
                     if sku != sku_from_sheets:
                         continue
                 else:
                     continue
-    
-            # If it reaches this point, it means it matched Shoe, Size, and SKU (if specified)
-            rows_to_update.append((index, row))
 
+            rows_to_update.append((index, row))
 
     if delete:
         rows_to_delete = []
         if size:
-            # Delete specific SKU and Size combination
             rows_to_delete = [index for index, row in enumerate(all_records, start=2)
                               if sku_to_string(row.get("Sku")) == sku and size_to_string(row.get("Capacity")) == size]
         else:
-            # Delete all rows with a specific SKU
             rows_to_delete = [index for index, row in enumerate(all_records, start=2)
                               if sku_to_string(row.get("Sku")) == sku]
 
         if not rows_to_delete:
             return {"message": "No rows found for deletion"}
 
-        # Sort rows in descending order so that rows can be deleted without shifting indices
         rows_to_delete.sort(reverse=True)
 
         for index in rows_to_delete:
-            sheet.delete_rows(index)
+            sheet1.delete_rows(index)
 
         return {"message": f"{len(rows_to_delete)} rows deleted"}
 
@@ -101,13 +115,12 @@ async def edit_shoe(
         return {"message": "Name, SKU, and Size combination not found"}
 
     for index, row in rows_to_update:
-        # Update the columns based on the provided values
         if new_size is not None:
             row["Capacity"] = new_size
         if new_shoe_name is not None:
             row["Model"] = new_shoe_name
         if new_sku is not None:
-            row["Sku"] = sku_to_string(new_sku)  # Ensure new_sku is treated as a string
+            row["Sku"] = sku_to_string(new_sku)
         if new_price_paid is not None:
             row["Price Paid"] = new_price_paid
         if new_quantity is not None:
@@ -129,10 +142,8 @@ async def edit_shoe(
         if note is not None:
             row["Notes"] = note
 
-        # Calculate the range for the specific row
-        range_start = f"A{index}"
-        range_end = chr(ord("A") + len(row) - 1) + str(index)
-        sheet.update(range_start + ":" + range_end, [list(row.values())], value_input_option="RAW")
+        update_row(sheet1, index, row)
+        update_row(sheet2, index, row)
 
     return {"message": "Cells updated"}
 
@@ -148,12 +159,10 @@ async def add_size(
     date: typing.Optional[str] = Query(None, title="Date"),
     price_paid: typing.Optional[str] = Query(None, title="Price Paid")
 ):
-    # Ensure that sku and add_size are always treated as strings
     sku = sku_to_string(sku)
     add_size = size_to_string(add_size)
 
-    # Find the last row containing the specified SKU
-    all_records = sheet.get_all_records()
+    all_records = sheet1.get_all_records()
     last_row_index = None
 
     for index, row in enumerate(all_records, start=2):
@@ -161,16 +170,9 @@ async def add_size(
             last_row_index = index
 
     if last_row_index is not None:
-        # Get the header row (the row containing field names)
-        header_row = sheet.row_values(1)  # Assuming header row is the first row
-
-        # Create a dictionary to map column names to their respective index
+        header_row = sheet1.row_values(1)
         column_mapping = {header: index for index, header in enumerate(header_row)}
-
-        # Create a new row with the provided data
-        new_row = [""] * len(header_row)  # Initialize a list with empty values
-
-        # Map the data to the appropriate columns
+        new_row = [""] * len(header_row)
         new_row[column_mapping["Model"]] = shoe_name
         new_row[column_mapping["Sku"]] = sku
         new_row[column_mapping["Capacity"]] = add_size
@@ -180,8 +182,8 @@ async def add_size(
         new_row[column_mapping["Notes"]] = cur_note
         new_row[column_mapping["Price Paid"]] = price_paid
 
-        # Insert a new row right after the last row containing the specified SKU
-        sheet.insert_rows([new_row], last_row_index + 1)
+        sheet1.insert_rows([new_row], last_row_index + 1)
+        sheet2.insert_rows([new_row], last_row_index + 1)
 
         return {"message": "New size added"}
     else:
@@ -198,38 +200,29 @@ async def add_sku(
     date: typing.Optional[str] = Query(None, title="Date"),
     cost: typing.Optional[str] = Query(None, title="Cost")
 ):
-    # Ensure that add_sku is always treated as a string
     add_sku = sku_to_string(add_sku)
 
-    # Find the last row containing the specified Shoe
-    all_records = sheet.get_all_records()
+    all_records = sheet1.get_all_records()
     last_row_index = None
 
-    for index, row in enumerate((all_records), start=2):
+    for index, row in enumerate(all_records, start=2):
         if row.get("Model") == shoe_name:
             last_row_index = index
 
     if last_row_index is not None:
-        # Get the header row (the row containing field names)
-        header_row = sheet.row_values(1)  # Assuming header row is the first row
-
-        # Create a dictionary to map column names to their respective index
+        header_row = sheet1.row_values(1)
         column_mapping = {header: index for index, header in enumerate(header_row)}
-
-        # Create a new row with the provided data
-        new_row = [""] * len(header_row)  # Initialize a list with empty values
-
-        # Map the data to the appropriate columns
+        new_row = [""] * len(header_row)
         new_row[column_mapping["Model"]] = shoe_name
-        new_row[column_mapping["Sku"]] = add_sku  # Use the provided SKU
+        new_row[column_mapping["Sku"]] = add_sku
         new_row[column_mapping["Complete"]] = complete
         new_row[column_mapping["Source"]] = cur_source
         new_row[column_mapping["Seller"]] = cur_seller
         new_row[column_mapping["Notes"]] = cur_note
         new_row[column_mapping["Price Paid"]] = cost
 
-        # Insert a new row right after the last row containing the specified Shoe
-        sheet.insert_rows([new_row], last_row_index + 1)
+        sheet1.insert_rows([new_row], last_row_index + 1)
+        sheet2.insert_rows([new_row], last_row_index + 1)
 
         return {"message": "New SKU added"}
     else:
