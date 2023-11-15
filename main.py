@@ -112,9 +112,9 @@ async def edit_shoe(
         return {"message": "Name and SKU combination not found"}
 
     for index, row in rows_to_update:
-        # Create separate row objects for each sheet
-        row_sheet1 = copy.deepcopy(row)
-        row_sheet2 = copy.deepcopy(row)
+        # Create separate dictionaries for each sheet
+        row_sheet1 = dict(row)
+        row_sheet2 = dict(row)
 
         if new_size is not None:
             row_sheet1["Capacity"] = new_size
