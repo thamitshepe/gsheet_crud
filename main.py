@@ -67,8 +67,8 @@ async def edit_shoe(
                     size_from_sheets = size_to_string(row.get("Capacity"))
                     if size != size_from_sheets:
                         continue
-            else:
-                continue
+                else:
+                    continue
 
             if sku:
                 if row.get("Sku"):
@@ -112,67 +112,75 @@ async def edit_shoe(
         return {"message": "Name and SKU combination not found"}
 
     for index, row in rows_to_update:
-        # Create separate dictionaries for each sheet
-        row_sheet1 = dict(row)
-        row_sheet2 = dict(row)
+        # Create separate lists for each sheet
+        row_sheet1 = list(row.values())
+        row_sheet2 = list(row.values())
 
+        # Update logic for sheet1
         if new_size is not None:
-            row_sheet1["Capacity"] = new_size
+            row_sheet1[row_columns.index("Capacity")] = new_size
         if new_shoe_name is not None:
-            row_sheet1["Model"] = new_shoe_name
+            row_sheet1[row_columns.index("Model")] = new_shoe_name
         if new_sku is not None:
-            row_sheet1["Sku"] = sku_to_string(new_sku)
+            row_sheet1[row_columns.index("Sku")] = sku_to_string(new_sku)
         if new_price_paid is not None:
-            row_sheet1["Price Paid"] = new_price_paid
+            row_sheet1[row_columns.index("Price Paid")] = new_price_paid
         if new_quantity is not None:
-            row_sheet1["Quantity"] = new_quantity
+            row_sheet1[row_columns.index("Quantity")] = new_quantity
         if new_condition is not None:
-            row_sheet1["Grade"] = new_condition
+            row_sheet1[row_columns.index("Grade")] = new_condition
         if new_list_price is not None:
-            row_sheet1["List Price"] = new_list_price
+            row_sheet1[row_columns.index("List Price")] = new_list_price
         if cost is not None:
-            row_sheet1["Cost"] = cost
+            row_sheet1[row_columns.index("Cost")] = cost
         if status is not None:
-            row_sheet1["Status"] = status
+            row_sheet1[row_columns.index("Status")] = status
         if listed is not None:
-            row_sheet1["Listed"] = listed
+            row_sheet1[row_columns.index("Listed")] = listed
         if source is not None:
-            row_sheet1["Source"] = source
+            row_sheet1[row_columns.index("Source")] = source
         if new_manufacturer is not None:
-            row_sheet1["Manufacturer"] = new_manufacturer
+            row_sheet1[row_columns.index("Manufacturer")] = new_manufacturer
         if seller is not None:
-            row_sheet1["Seller"] = seller
+            row_sheet1[row_columns.index("Seller")] = seller
         if note is not None:
-            row_sheet1["Notes"] = note
+            row_sheet1[row_columns.index("Notes")] = note
         if new_damages is not None:
-            row_sheet1["Damages"] = new_damages
+            row_sheet1[row_columns.index("Damages")] = new_damages
 
         # Calculate the range for the specific row in the first sheet
         range_start_sheet1 = f"A{index}"
         range_end_sheet1 = chr(ord("A") + len(row_sheet1) - 1) + str(index)
-        sheet1.update(range_start_sheet1 + ":" + range_end_sheet1, [list(row_sheet1.values())], value_input_option="RAW")
 
-        
-        # Update logic for sheet2 using row_sheet2
+        try:
+            sheet1.update(range_start_sheet1 + ":" + range_end_sheet1, [row_sheet1], value_input_option="RAW")
+        except Exception as e:
+            return {"error": f"Error updating sheet1: {str(e)}"}
+
+        # Update logic for sheet2
         if new_size is not None:
-            row_sheet2["Capacity"] = new_size
+            row_sheet2[row_columns.index("Capacity")] = new_size
         if new_shoe_name is not None:
-            row_sheet2["Model"] = new_shoe_name
+            row_sheet2[row_columns.index("Model")] = new_shoe_name
         if new_sku is not None:
-            row_sheet2["Sku"] = sku_to_string(new_sku)
+            row_sheet2[row_columns.index("Sku")] = sku_to_string(new_sku)
         if new_condition is not None:
-            row_sheet2["Grade"] = new_condition
+            row_sheet2[row_columns.index("Grade")] = new_condition
         if new_manufacturer is not None:
-            row_sheet2["Manufacturer"] = new_manufacturer
+            row_sheet2[row_columns.index("Manufacturer")] = new_manufacturer
         if new_damages is not None:
-            row_sheet2["Damages"] = new_damages
+            row_sheet2[row_columns.index("Damages")] = new_damages
         if new_code is not None:
-            row_sheet2["Code"] = new_code
+            row_sheet2[row_columns.index("Code")] = new_code
 
         # Calculate the range for the specific row in the second sheet
         range_start_sheet2 = f"A{index}"
         range_end_sheet2 = chr(ord("A") + len(row_sheet2) - 1) + str(index)
-        sheet2.update(range_start_sheet2 + ":" + range_end_sheet2, [list(row_sheet2.values())], value_input_option="RAW")
+
+        try:
+            sheet2.update(range_start_sheet2 + ":" + range_end_sheet2, [row_sheet2], value_input_option="RAW")
+        except Exception as e:
+            return {"error": f"Error updating sheet2: {str(e)}"}
 
     return {"message": "Cells updated"}
 
