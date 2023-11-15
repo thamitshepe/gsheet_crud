@@ -81,7 +81,7 @@ async def edit_shoe(
             rows_to_update_sheet1.append((index, row))
 
     for index, row in enumerate(all_records_sheet2, start=2):
-        # Similar logic for filtering rows in sheet2 based on shoe_name, size, and sku
+        # Similar logic for filtering rows in sheet2 based on shoe_name and sku
         if row.get("Model") == shoe_name:
 
             if sku:
@@ -102,7 +102,7 @@ async def edit_shoe(
             rows_to_delete_sheet1 = [index for index, row in enumerate(all_records_sheet1, start=2)
                                       if sku_to_string(row.get("Sku")) == sku and size_to_string(row.get("Capacity")) == size]
             rows_to_delete_sheet2 = [index for index, row in enumerate(all_records_sheet2, start=2)
-                                      if sku_to_string(row.get("Sku")) == sku and size_to_string(row.get("Capacity")) == size]
+                                      if sku_to_string(row.get("Sku")) == sku]
         else:
             rows_to_delete_sheet1 = [index for index, row in enumerate(all_records_sheet1, start=2)
                                       if sku_to_string(row.get("Sku")) == sku]
@@ -125,11 +125,50 @@ async def edit_shoe(
         return {"message": f"{len(rows_to_delete_sheet1) + len(rows_to_delete_sheet2)} rows deleted"}
 
     if not rows_to_update_sheet1 and not rows_to_update_sheet2:
-        return {"message": "Name, SKU, and Size combination not found"}
+        return {"message": "Name and SKU combination not found"}
 
-    for index, row in rows_to_update:
-        if new_size is not None:
+    for index, row in rows_to_update_sheet1:
+        # Update logic for sheet1
+        if new_size is not None and "Capacity" in row:
             row["Capacity"] = new_size
+        if new_shoe_name is not None:
+            row["Model"] = new_shoe_name
+        if new_sku is not None:
+            row["Sku"] = sku_to_string(new_sku)
+        if new_price_paid is not None and "Price Paid" in row:
+            row["Price Paid"] = new_price_paid
+        if new_quantity is not None and "Quantity" in row:
+            row["Quantity"] = new_quantity
+        if new_condition is not None and "Grade" in row:
+            row["Grade"] = new_condition
+        if new_list_price is not None and "List Price" in row:
+            row["List Price"] = new_list_price
+        if cost is not None and "Cost" in row:
+            row["Cost"] = cost
+        if status is not None and "Status" in row:
+            row["Status"] = status
+        if listed is not None and "Listed" in row:
+            row["Listed"] = listed
+        if source is not None and "Source" in row:
+            row["Source"] = source
+        if new_manufacturer is not None and "Manufacturer" in row:
+            row["Manufacturer"] = new_manufacturer
+        if seller is not None and "Seller" in row:
+            row["Seller"] = seller
+        if note is not None and "Notes" in row:
+            row["Notes"] = note
+        if new_damages is not None and "Damages" in row:
+            row["Damages"] = new_damages
+        if new_code is not None and "Code" in row:
+            row["Code"] = new_code
+
+        # Calculate the range for the specific row in the first sheet
+        range_start_sheet1 = f"A{index}"
+        range_end_sheet1 = chr(ord("A") + len(row) - 1) + str(index)
+        sheet1.update(range_start_sheet1 + ":" + range_end_sheet1, [list(row.values())], value_input_option="RAW")
+
+    for index, row in rows_to_update_sheet2:
+        # Update logic for sheet2
         if new_shoe_name is not None:
             row["Model"] = new_shoe_name
         if new_sku is not None:
@@ -142,30 +181,13 @@ async def edit_shoe(
             row["Grade"] = new_condition
         if new_list_price is not None:
             row["List Price"] = new_list_price
-        if cost is not None:
-            row["Cost"] = cost
-        if status is not None:
-            row["Status"] = status
-        if listed is not None:
-            row["Listed"] = listed
-        if source is not None:
-            row["Source"] = source
         if new_manufacturer is not None:
             row["Manufacturer"] = new_manufacturer
-        if seller is not None:
-            row["Seller"] = seller
-        if note is not None:
-            row["Notes"] = note
         if new_damages is not None:
             row["Damages"] = new_damages
         if new_code is not None:
             row["Code"] = new_code
 
-        # Calculate the range for the specific row in the first sheet
-        range_start_sheet1 = f"A{index}"
-        range_end_sheet1 = chr(ord("A") + len(row) - 1) + str(index)
-        sheet1.update(range_start_sheet1 + ":" + range_end_sheet1, [list(row.values())], value_input_option="RAW")
-    
         # Calculate the range for the specific row in the second sheet
         range_start_sheet2 = f"A{index}"
         range_end_sheet2 = chr(ord("A") + len(row) - 1) + str(index)
