@@ -84,8 +84,6 @@ async def edit_shoe(
         if size:
             rows_to_delete_sheet1 = [index for index, row in enumerate(all_records_sheet1, start=2)
                                       if sku_to_string(row.get("Sku")) == sku and size_to_string(row.get("Capacity")) == size]
-            rows_to_delete_sheet2 = [index for index, row in enumerate(all_records_sheet2, start=2)
-                                      if sku_to_string(row.get("Sku")) == sku and size_to_string(row.get("Capacity")) == size]
         else:
             rows_to_delete_sheet1 = [index for index, row in enumerate(all_records_sheet1, start=2)
                                       if sku_to_string(row.get("Sku")) == sku]
@@ -107,40 +105,39 @@ async def edit_shoe(
 
         return {"message": f"{len(rows_to_delete_sheet1) + len(rows_to_delete_sheet2)} rows deleted"}
 
-    if not rows_to_update_sheet1 and not rows_to_update_sheet2:
+    if not rows_to_update:
         return {"message": "Name and SKU combination not found"}
 
     for index, row in rows_to_update:
-        # Update logic for sheet1
-        if new_size is not None and "Capacity" in row:
+        if new_size is not None:
             row["Capacity"] = new_size
         if new_shoe_name is not None:
             row["Model"] = new_shoe_name
         if new_sku is not None:
             row["Sku"] = sku_to_string(new_sku)
-        if new_price_paid is not None and "Price Paid" in row:
+        if new_price_paid is not None:
             row["Price Paid"] = new_price_paid
-        if new_quantity is not None and "Quantity" in row:
+        if new_quantity is not None:
             row["Quantity"] = new_quantity
-        if new_condition is not None and "Grade" in row:
+        if new_condition is not None:
             row["Grade"] = new_condition
-        if new_list_price is not None and "List Price" in row:
+        if new_list_price is not None:
             row["List Price"] = new_list_price
-        if cost is not None and "Cost" in row:
+        if cost is not None:
             row["Cost"] = cost
-        if status is not None and "Status" in row:
+        if status is not None:
             row["Status"] = status
-        if listed is not None and "Listed" in row:
+        if listed is not None:
             row["Listed"] = listed
-        if source is not None and "Source" in row:
+        if source is not None:
             row["Source"] = source
-        if new_manufacturer is not None and "Manufacturer" in row:
+        if new_manufacturer is not None:
             row["Manufacturer"] = new_manufacturer
-        if seller is not None and "Seller" in row:
+        if seller is not None:
             row["Seller"] = seller
-        if note is not None and "Notes" in row:
+        if note is not None:
             row["Notes"] = note
-        if new_damages is not None and "Damages" in row:
+        if new_damages is not None:
             row["Damages"] = new_damages
 
         # Calculate the range for the specific row in the first sheet
@@ -182,7 +179,6 @@ async def add_size(
     manufacturer: typing.Optional[str] = Query(None, title="Optional: Manufacturer"),
     price_paid: typing.Optional[str] = Query(None, title="Price Paid"),
     damages: typing.Optional[str] = Query(None, title="Damages"),
-    code: typing.Optional[str] = Query(None, title="Code"),
     grade: typing.Optional[str] = Query(None, title="Grade")
 ):
     sku = sku_to_string(sku)
@@ -229,7 +225,6 @@ async def add_size(
     new_row_sheet2[column_mapping_sheet2["Sku"]] = sku
     new_row_sheet2[column_mapping_sheet2["Manufacturer"]] = manufacturer
     new_row_sheet2[column_mapping_sheet2["Damages"]] = damages
-    new_row_sheet2[column_mapping_sheet2["Code"]] = code
     new_row_sheet2[column_mapping_sheet2["Grade"]] = grade
 
     # Insert rows into both sheets
@@ -251,7 +246,6 @@ async def add_sku(
     manufacturer: typing.Optional[str] = Query(None, title="Optional: Manufacturer"),
     cost: typing.Optional[str] = Query(None, title="Cost"),
     damages: typing.Optional[str] = Query(None, title="Damages"),
-    code: typing.Optional[str] = Query(None, title="Code"),
     grade: typing.Optional[str] = Query(None, title="Grade")
 ):
     add_sku = sku_to_string(add_sku)
@@ -296,7 +290,6 @@ async def add_sku(
     new_row_sheet2[column_mapping_sheet2["Sku"]] = add_sku
     new_row_sheet2[column_mapping_sheet2["Manufacturer"]] = manufacturer
     new_row_sheet2[column_mapping_sheet2["Damages"]] = damages
-    new_row_sheet2[column_mapping_sheet2["Code"]] = code
     new_row_sheet2[column_mapping_sheet2["Grade"]] = grade
 
     # Insert rows into both sheets
