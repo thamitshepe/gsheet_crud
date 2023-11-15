@@ -56,8 +56,10 @@ async def edit_shoe(
 
     rows_to_update = []
 
-    all_records = sheet1.get_all_records()
-    for index, row in enumerate(all_records, start=2):
+    all_records_sheet1 = sheet1.get_all_records()
+    all_records_sheet2 = sheet2.get_all_records()
+
+    for index, row in enumerate(all_records_sheet1, start=2):
         if row.get("Model") == shoe_name:
             if size:
                 if row.get("Capacity"):
@@ -109,60 +111,64 @@ async def edit_shoe(
         return {"message": "Name and SKU combination not found"}
 
     for index, row in rows_to_update:
+        # Create separate row objects for each sheet
+        row_sheet1 = dict(row)
+        row_sheet2 = dict(row)
+
         if new_size is not None:
-            row["Capacity"] = new_size
+            row_sheet1["Capacity"] = new_size
         if new_shoe_name is not None:
-            row["Model"] = new_shoe_name
+            row_sheet1["Model"] = new_shoe_name
         if new_sku is not None:
-            row["Sku"] = sku_to_string(new_sku)
+            row_sheet1["Sku"] = sku_to_string(new_sku)
         if new_price_paid is not None:
-            row["Price Paid"] = new_price_paid
+            row_sheet1["Price Paid"] = new_price_paid
         if new_quantity is not None:
-            row["Quantity"] = new_quantity
+            row_sheet1["Quantity"] = new_quantity
         if new_condition is not None:
-            row["Grade"] = new_condition
+            row_sheet1["Grade"] = new_condition
         if new_list_price is not None:
-            row["List Price"] = new_list_price
+            row_sheet1["List Price"] = new_list_price
         if cost is not None:
-            row["Cost"] = cost
+            row_sheet1["Cost"] = cost
         if status is not None:
-            row["Status"] = status
+            row_sheet1["Status"] = status
         if listed is not None:
-            row["Listed"] = listed
+            row_sheet1["Listed"] = listed
         if source is not None:
-            row["Source"] = source
+            row_sheet1["Source"] = source
         if new_manufacturer is not None:
-            row["Manufacturer"] = new_manufacturer
+            row_sheet1["Manufacturer"] = new_manufacturer
         if seller is not None:
-            row["Seller"] = seller
+            row_sheet1["Seller"] = seller
         if note is not None:
-            row["Notes"] = note
+            row_sheet1["Notes"] = note
         if new_damages is not None:
-            row["Damages"] = new_damages
+            row_sheet1["Damages"] = new_damages
 
         # Calculate the range for the specific row in the first sheet
         range_start_sheet1 = f"A{index}"
-        range_end_sheet1 = chr(ord("A") + len(row) - 1) + str(index)
-        sheet1.update(range_start_sheet1 + ":" + range_end_sheet1, [list(row.values())], value_input_option="RAW")
+        range_end_sheet1 = chr(ord("A") + len(row_sheet1) - 1) + str(index)
+        sheet1.update(range_start_sheet1 + ":" + range_end_sheet1, [list(row_sheet1.values())], value_input_option="RAW")
 
-        # Update logic for sheet2
+        # Update logic for sheet2 using row_sheet2
         if new_shoe_name is not None:
-            row["Model"] = new_shoe_name
+            row_sheet2["Model"] = new_shoe_name
         if new_sku is not None:
-            row["Sku"] = sku_to_string(new_sku)
+            row_sheet2["Sku"] = sku_to_string(new_sku)
         if new_condition is not None:
-            row["Grade"] = new_condition
+            row_sheet2["Grade"] = new_condition
         if new_manufacturer is not None:
-            row["Manufacturer"] = new_manufacturer
+            row_sheet2["Manufacturer"] = new_manufacturer
         if new_damages is not None:
-            row["Damages"] = new_damages
+            row_sheet2["Damages"] = new_damages
         if new_code is not None:
-            row["Code"] = new_code
+            row_sheet2["Code"] = new_code
 
         # Calculate the range for the specific row in the second sheet
         range_start_sheet2 = f"A{index}"
-        range_end_sheet2 = chr(ord("A") + len(row) - 1) + str(index)
-        sheet2.update(range_start_sheet2 + ":" + range_end_sheet2, [list(row.values())], value_input_option="RAW")
+        range_end_sheet2 = chr(ord("A") + len(row_sheet2) - 1) + str(index)
+        sheet2.update(range_start_sheet2 + ":" + range_end_sheet2, [list(row_sheet2.values())], value_input_option="RAW")
 
     return {"message": "Cells updated"}
 
