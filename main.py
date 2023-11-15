@@ -52,47 +52,30 @@ async def edit_shoe(
     delete: typing.Optional[bool] = Query(False, title="Optional: Delete")
 ):
 
-    sku = sku_to_string(sku)
+sku = sku_to_string(sku)
 
-    rows_to_update_sheet1 = []
-    rows_to_update_sheet2 = []
+rows_to_update = []
 
-    all_records_sheet1 = sheet1.get_all_records()
-    all_records_sheet2 = sheet2.get_all_records()
-
-    for index, row in enumerate(all_records_sheet1, start=2):
-        if row.get("Model") == shoe_name:
-            if size:
-                if row.get("Capacity"):
-                    size_from_sheets = size_to_string(row.get("Capacity"))
-                    if size != size_from_sheets:
-                        continue
-                else:
+all_records = sheet1.get_all_records()
+for index, row in enumerate(all_records, start=2):
+    if row.get("Model") == shoe_name:
+        if size:
+            if row.get("Capacity"):
+                size_from_sheets = size_to_string(row.get("Capacity"))
+                if size != size_from_sheets:
                     continue
+            else:
+                continue
 
-            if sku:
-                if row.get("Sku"):
-                    sku_from_sheets = sku_to_string(row.get("Sku"))
-                    if sku != sku_from_sheets:
-                        continue
-                else:
+        if sku:
+            if row.get("Sku"):
+                sku_from_sheets = sku_to_string(row.get("Sku"))
+                if sku != sku_from_sheets:
                     continue
+            else:
+                continue
 
-            rows_to_update_sheet1.append((index, row))
-
-    for index, row in enumerate(all_records_sheet2, start=2):
-        # Similar logic for filtering rows in sheet2 based on shoe_name and sku
-        if row.get("Model") == shoe_name:
-
-            if sku:
-                if row.get("Sku"):
-                    sku_from_sheets = sku_to_string(row.get("Sku"))
-                    if sku != sku_from_sheets:
-                        continue
-                else:
-                    continue
-
-            rows_to_update_sheet2.append((index, row))
+        rows_to_update.append((index, row))
 
     if delete:
         rows_to_delete_sheet1 = []
@@ -101,8 +84,6 @@ async def edit_shoe(
         if size:
             rows_to_delete_sheet1 = [index for index, row in enumerate(all_records_sheet1, start=2)
                                       if sku_to_string(row.get("Sku")) == sku and size_to_string(row.get("Capacity")) == size]
-            rows_to_delete_sheet2 = [index for index, row in enumerate(all_records_sheet2, start=2)
-                                      if sku_to_string(row.get("Sku")) == sku]
         else:
             rows_to_delete_sheet1 = [index for index, row in enumerate(all_records_sheet1, start=2)
                                       if sku_to_string(row.get("Sku")) == sku]
@@ -127,7 +108,7 @@ async def edit_shoe(
     if not rows_to_update_sheet1 and not rows_to_update_sheet2:
         return {"message": "Name and SKU combination not found"}
 
-    for index, row in rows_to_update_sheet1:
+    for index, row in rows_to_update:
         # Update logic for sheet1
         if new_size is not None and "Capacity" in row:
             row["Capacity"] = new_size
@@ -159,28 +140,19 @@ async def edit_shoe(
             row["Notes"] = note
         if new_damages is not None and "Damages" in row:
             row["Damages"] = new_damages
-        if new_code is not None and "Code" in row:
-            row["Code"] = new_code
 
         # Calculate the range for the specific row in the first sheet
         range_start_sheet1 = f"A{index}"
         range_end_sheet1 = chr(ord("A") + len(row) - 1) + str(index)
         sheet1.update(range_start_sheet1 + ":" + range_end_sheet1, [list(row.values())], value_input_option="RAW")
 
-    for index, row in rows_to_update_sheet2:
         # Update logic for sheet2
         if new_shoe_name is not None:
             row["Model"] = new_shoe_name
         if new_sku is not None:
             row["Sku"] = sku_to_string(new_sku)
-        if new_price_paid is not None:
-            row["Price Paid"] = new_price_paid
-        if new_quantity is not None:
-            row["Quantity"] = new_quantity
         if new_condition is not None:
             row["Grade"] = new_condition
-        if new_list_price is not None:
-            row["List Price"] = new_list_price
         if new_manufacturer is not None:
             row["Manufacturer"] = new_manufacturer
         if new_damages is not None:
