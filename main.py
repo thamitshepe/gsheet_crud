@@ -93,6 +93,7 @@ async def edit_shoe(
 
         for index in rows_to_delete:
             sheet1.delete_rows(index)
+            sheet2.delete_rows(index)
 
         return {"message": f"{len(rows_to_delete)} rows deleted"}
 
@@ -133,8 +134,15 @@ async def edit_shoe(
         if new_code is not None:
             row["Code"] = new_code
 
-        update_row(sheet1, index, row)
-        update_row(sheet2, index, row)
+        # Calculate the range for the specific row in the first sheet
+        range_start_sheet1 = f"A{index}"
+        range_end_sheet1 = chr(ord("A") + len(row) - 1) + str(index)
+        sheet1.update(range_start_sheet1 + ":" + range_end_sheet1, [list(row.values())], value_input_option="RAW")
+    
+        # Calculate the range for the specific row in the second sheet
+        range_start_sheet2 = f"A{index}"
+        range_end_sheet2 = chr(ord("A") + len(row) - 1) + str(index)
+        sheet2.update(range_start_sheet2 + ":" + range_end_sheet2, [list(row.values())], value_input_option="RAW")
 
     return {"message": "Cells updated"}
 
@@ -156,35 +164,61 @@ async def add_size(
     sku = sku_to_string(sku)
     add_size = size_to_string(add_size)
 
-    all_records = sheet1.get_all_records()
-    last_row_index = None
+    all_records_sheet1 = sheet1.get_all_records()
+    all_records_sheet2 = sheet2.get_all_records()
 
-    for index, row in enumerate(all_records, start=2):
+    last_row_index_sheet1 = None
+    last_row_index_sheet2 = None
+
+    # Find the last row index in sheet1
+    for index, row in enumerate(all_records_sheet1, start=2):
         if sku_to_string(row.get("Sku")) == sku:
-            last_row_index = index
+            last_row_index_sheet1 = index
 
-    if last_row_index is not None:
-        header_row = sheet1.row_values(1)
-        column_mapping = {header: index for index, header in enumerate(header_row)}
-        new_row = [""] * len(header_row)
-        new_row[column_mapping["Model"]] = shoe_name
-        new_row[column_mapping["Sku"]] = sku
-        new_row[column_mapping["Capacity"]] = add_size
-        new_row[column_mapping["Complete"]] = complete
-        new_row[column_mapping["Source"]] = cur_source
-        new_row[column_mapping["Seller"]] = cur_seller
-        new_row[column_mapping["Notes"]] = cur_note
-        new_row[column_mapping["Manufacturer"]] = manufacturer
-        new_row[column_mapping["Price Paid"]] = price_paid
-        new_row[column_mapping["Damages"]] = damages
-        new_row[column_mapping["Code"]] = code
+    # Find the last row index in sheet2
+    for index, row in enumerate(all_records_sheet2, start=2):
+        # Adjust the condition according to your sheet2 structure
+        if row.get("SomeColumnInSheet2") == sku:
+            last_row_index_sheet2 = index
 
-        sheet1.insert_rows([new_row], last_row_index + 1)
-        sheet2.insert_rows([new_row], last_row_index + 1)
+    # Use the header_row from sheet1 for column mapping
+    header_row_sheet1 = sheet1.row_values(1)
+    column_mapping_sheet1 = {header: index for index, header in enumerate(header_row_sheet1)}
+    new_row_sheet1 = [""] * len(header_row_sheet1)
+    new_row_sheet1[column_mapping_sheet1["Model"]] = shoe_name
+    new_row_sheet1[column_mapping_sheet1["Sku"]] = sku
+    new_row_sheet1[column_mapping_sheet1["Capacity"]] = add_size
+    new_row_sheet1[column_mapping_sheet1["Complete"]] = complete
+    new_row_sheet1[column_mapping_sheet1["Source"]] = cur_source
+    new_row_sheet1[column_mapping_sheet1["Seller"]] = cur_seller
+    new_row_sheet1[column_mapping_sheet1["Notes"]] = cur_note
+    new_row_sheet1[column_mapping_sheet1["Manufacturer"]] = manufacturer
+    new_row_sheet1[column_mapping_sheet1["Price Paid"]] = price_paid
+    new_row_sheet1[column_mapping_sheet1["Damages"]] = damages
+    new_row_sheet1[column_mapping_sheet1["Code"]] = code
 
-        return {"message": "New size added"}
-    else:
-        return {"message": "No rows found for the specified SKU"}
+    # Use the header_row from sheet2 for column mapping
+    header_row_sheet2 = sheet2.row_values(1)
+    column_mapping_sheet2 = {header: index for index, header in enumerate(header_row_sheet2)}
+    new_row_sheet2 = [""] * len(header_row_sheet2)
+    new_row_sheet2[column_mapping_sheet2["Model"]] = shoe_name
+    new_row_sheet2[column_mapping_sheet2["Sku"]] = sku
+    new_row_sheet2[column_mapping_sheet2["Capacity"]] = add_size
+    new_row_sheet2[column_mapping_sheet2["Complete"]] = complete
+    new_row_sheet2[column_mapping_sheet2["Source"]] = cur_source
+    new_row_sheet2[column_mapping_sheet2["Seller"]] = cur_seller
+    new_row_sheet2[column_mapping_sheet2["Notes"]] = cur_note
+    new_row_sheet2[column_mapping_sheet2["Manufacturer"]] = manufacturer
+    new_row_sheet2[column_mapping_sheet2["Price Paid"]] = price_paid
+    new_row_sheet2[column_mapping_sheet2["Damages"]] = damages
+    new_row_sheet2[column_mapping_sheet2["Code"]] = code
+
+    # Insert rows into both sheets
+    sheet1.insert_rows([new_row_sheet1], last_row_index_sheet1 + 1)
+    sheet2.insert_rows([new_row_sheet2], last_row_index_sheet2 + 1)
+
+    return {"message": "New size added"}
+
 
 @app.post("/add-sku")
 async def add_sku(
@@ -202,31 +236,56 @@ async def add_sku(
 ):
     add_sku = sku_to_string(add_sku)
 
-    all_records = sheet1.get_all_records()
-    last_row_index = None
+    all_records_sheet1 = sheet1.get_all_records()
+    all_records_sheet2 = sheet2.get_all_records()
 
-    for index, row in enumerate(all_records, start=2):
+    last_row_index_sheet1 = None
+    last_row_index_sheet2 = None
+
+    # Find the last row index in sheet1
+    for index, row in enumerate(all_records_sheet1, start=2):
         if row.get("Model") == shoe_name:
-            last_row_index = index
+            last_row_index_sheet1 = index
 
-    if last_row_index is not None:
-        header_row = sheet1.row_values(1)
-        column_mapping = {header: index for index, header in enumerate(header_row)}
-        new_row = [""] * len(header_row)
-        new_row[column_mapping["Model"]] = shoe_name
-        new_row[column_mapping["Sku"]] = add_sku
-        new_row[column_mapping["Complete"]] = complete
-        new_row[column_mapping["Source"]] = cur_source
-        new_row[column_mapping["Seller"]] = cur_seller
-        new_row[column_mapping["Notes"]] = cur_note
-        new_row[column_mapping["Manufacturer"]] = manufacturer
-        new_row[column_mapping["Price Paid"]] = cost
-        new_row[column_mapping["Damages"]] = damages
-        new_row[column_mapping["Code"]] = code
+    # Find the last row index in sheet2
+    for index, row in enumerate(all_records_sheet2, start=2):
+        # Adjust the condition according to your sheet2 structure
+        if row.get("SomeColumnInSheet2") == shoe_name:
+            last_row_index_sheet2 = index
 
-        sheet1.insert_rows([new_row], last_row_index + 1)
-        sheet2.insert_rows([new_row], last_row_index + 1)
+    # Use the header_row from sheet1 for column mapping
+    header_row_sheet1 = sheet1.row_values(1)
+    column_mapping_sheet1 = {header: index for index, header in enumerate(header_row_sheet1)}
+    new_row_sheet1 = [""] * len(header_row_sheet1)
+    new_row_sheet1[column_mapping_sheet1["Model"]] = shoe_name
+    new_row_sheet1[column_mapping_sheet1["Sku"]] = add_sku
+    new_row_sheet1[column_mapping_sheet1["Complete"]] = complete
+    new_row_sheet1[column_mapping_sheet1["Source"]] = cur_source
+    new_row_sheet1[column_mapping_sheet1["Seller"]] = cur_seller
+    new_row_sheet1[column_mapping_sheet1["Notes"]] = cur_note
+    new_row_sheet1[column_mapping_sheet1["Manufacturer"]] = manufacturer
+    new_row_sheet1[column_mapping_sheet1["Price Paid"]] = cost
+    new_row_sheet1[column_mapping_sheet1["Damages"]] = damages
+    new_row_sheet1[column_mapping_sheet1["Code"]] = code
 
-        return {"message": "New SKU added"}
-    else:
-        return {"message": "No rows found for the specified Shoe"}
+    # Use the header_row from sheet2 for column mapping
+    header_row_sheet2 = sheet2.row_values(1)
+    column_mapping_sheet2 = {header: index for index, header in enumerate(header_row_sheet2)}
+    new_row_sheet2 = [""] * len(header_row_sheet2)
+    new_row_sheet2[column_mapping_sheet2["Model"]] = shoe_name
+    new_row_sheet2[column_mapping_sheet2["Sku"]] = add_sku
+    new_row_sheet2[column_mapping_sheet2["Complete"]] = complete
+    new_row_sheet2[column_mapping_sheet2["Source"]] = cur_source
+    new_row_sheet2[column_mapping_sheet2["Seller"]] = cur_seller
+    new_row_sheet2[column_mapping_sheet2["Notes"]] = cur_note
+    new_row_sheet2[column_mapping_sheet2["Manufacturer"]] = manufacturer
+    new_row_sheet2[column_mapping_sheet2["Price Paid"]] = cost
+    new_row_sheet2[column_mapping_sheet2["Damages"]] = damages
+    new_row_sheet2[column_mapping_sheet2["Code"]] = code
+
+    # Insert rows into both sheets
+    sheet1.insert_rows([new_row_sheet1], last_row_index_sheet1 + 1)
+    sheet2.insert_rows([new_row_sheet2], last_row_index_sheet2 + 1)
+
+    return {"message": "New SKU added"}
+
