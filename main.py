@@ -67,8 +67,8 @@ async def edit_shoe(
                     size_from_sheets = size_to_string(row.get("Capacity"))
                     if size != size_from_sheets:
                         continue
-                else:
-                    continue
+            else:
+                continue
 
             if sku:
                 if row.get("Sku"):
@@ -154,6 +154,8 @@ async def edit_shoe(
 
         
         # Update logic for sheet2 using row_sheet2
+        if new_size is not None:
+            row_sheet2["Capacity"] = new_size
         if new_shoe_name is not None:
             row_sheet2["Model"] = new_shoe_name
         if new_sku is not None:
@@ -234,6 +236,7 @@ async def add_size(
     new_row_sheet2[column_mapping_sheet2["Manufacturer"]] = manufacturer
     new_row_sheet2[column_mapping_sheet2["Damages"]] = damages
     new_row_sheet2[column_mapping_sheet2["Grade"]] = grade
+    new_row_sheet2[column_mapping_sheet2["Capacity"]] = size
 
     # Insert rows into both sheets
     sheet1.insert_rows([new_row_sheet1], last_row_index_sheet1 + 1)
