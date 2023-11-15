@@ -2,6 +2,7 @@ from fastapi import FastAPI, Query
 from oauth2client.service_account import ServiceAccountCredentials
 import gspread
 import typing
+import copy
 
 app = FastAPI()
 
@@ -112,8 +113,8 @@ async def edit_shoe(
 
     for index, row in rows_to_update:
         # Create separate row objects for each sheet
-        row_sheet1 = dict(row)
-        row_sheet2 = dict(row)
+        row_sheet1 = copy.deepcopy(row)
+        row_sheet2 = copy.deepcopy(row)
 
         if new_size is not None:
             row_sheet1["Capacity"] = new_size
