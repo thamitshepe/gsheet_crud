@@ -54,10 +54,13 @@ async def edit_shoe(
 
     sku = sku_to_string(sku)
 
-    rows_to_update = []
+    rows_to_update_sheet1 = []
+    rows_to_update_sheet2 = []
 
-    all_records = sheet1.get_all_records()
-    for index, row in enumerate(all_records, start=2):
+    all_records_sheet1 = sheet1.get_all_records()
+    all_records_sheet2 = sheet2.get_all_records()
+
+    for index, row in enumerate(all_records_sheet1, start=2):
         if row.get("Model") == shoe_name:
             if size:
                 if row.get("Capacity"):
@@ -75,29 +78,60 @@ async def edit_shoe(
                 else:
                     continue
 
-            rows_to_update.append((index, row))
+            rows_to_update_sheet1.append((index, row))
+
+    for index, row in enumerate(all_records_sheet2, start=2):
+        # Similar logic for filtering rows in sheet2 based on shoe_name, size, and sku
+        if row.get("Model") == shoe_name:
+            if size:
+                if row.get("Capacity"):
+                    size_from_sheets = size_to_string(row.get("Capacity"))
+                    if size != size_from_sheets:
+                        continue
+                else:
+                    continue
+
+            if sku:
+                if row.get("Sku"):
+                    sku_from_sheets = sku_to_string(row.get("Sku"))
+                    if sku != sku_from_sheets:
+                        continue
+                else:
+                    continue
+
+            rows_to_update_sheet2.append((index, row))
 
     if delete:
-        rows_to_delete = []
-        if size:
-            rows_to_delete = [index for index, row in enumerate(all_records, start=2)
-                              if sku_to_string(row.get("Sku")) == sku and size_to_string(row.get("Capacity")) == size]
-        else:
-            rows_to_delete = [index for index, row in enumerate(all_records, start=2)
-                              if sku_to_string(row.get("Sku")) == sku]
+        rows_to_delete_sheet1 = []
+        rows_to_delete_sheet2 = []
 
-        if not rows_to_delete:
+        if size:
+            rows_to_delete_sheet1 = [index for index, row in enumerate(all_records_sheet1, start=2)
+                                      if sku_to_string(row.get("Sku")) == sku and size_to_string(row.get("Capacity")) == size]
+            rows_to_delete_sheet2 = [index for index, row in enumerate(all_records_sheet2, start=2)
+                                      if sku_to_string(row.get("Sku")) == sku and size_to_string(row.get("Capacity")) == size]
+        else:
+            rows_to_delete_sheet1 = [index for index, row in enumerate(all_records_sheet1, start=2)
+                                      if sku_to_string(row.get("Sku")) == sku]
+            rows_to_delete_sheet2 = [index for index, row in enumerate(all_records_sheet2, start=2)
+                                      if sku_to_string(row.get("Sku")) == sku]
+
+        if not rows_to_delete_sheet1 and not rows_to_delete_sheet2:
             return {"message": "No rows found for deletion"}
 
-        rows_to_delete.sort(reverse=True)
-
-        for index in rows_to_delete:
+        # Deleting rows from sheet1
+        rows_to_delete_sheet1.sort(reverse=True)
+        for index in rows_to_delete_sheet1:
             sheet1.delete_rows(index)
+
+        # Deleting rows from sheet2
+        rows_to_delete_sheet2.sort(reverse=True)
+        for index in rows_to_delete_sheet2:
             sheet2.delete_rows(index)
 
-        return {"message": f"{len(rows_to_delete)} rows deleted"}
+        return {"message": f"{len(rows_to_delete_sheet1) + len(rows_to_delete_sheet2)} rows deleted"}
 
-    if not rows_to_update:
+    if not rows_to_update_sheet1 and not rows_to_update_sheet2:
         return {"message": "Name, SKU, and Size combination not found"}
 
     for index, row in rows_to_update:
@@ -159,7 +193,8 @@ async def add_size(
     manufacturer: typing.Optional[str] = Query(None, title="Optional: Manufacturer"),
     price_paid: typing.Optional[str] = Query(None, title="Price Paid"),
     damages: typing.Optional[str] = Query(None, title="Damages"),
-    code: typing.Optional[str] = Query(None, title="Code")
+    code: typing.Optional[str] = Query(None, title="Code"),
+    grade: typing.Optional[str] = Query(None, title="Grade")
 ):
     sku = sku_to_string(sku)
     add_size = size_to_string(add_size)
@@ -178,7 +213,7 @@ async def add_size(
     # Find the last row index in sheet2
     for index, row in enumerate(all_records_sheet2, start=2):
         # Adjust the condition according to your sheet2 structure
-        if row.get("SomeColumnInSheet2") == sku:
+        if row.get("Sku") == sku:
             last_row_index_sheet2 = index
 
     # Use the header_row from sheet1 for column mapping
@@ -195,7 +230,7 @@ async def add_size(
     new_row_sheet1[column_mapping_sheet1["Manufacturer"]] = manufacturer
     new_row_sheet1[column_mapping_sheet1["Price Paid"]] = price_paid
     new_row_sheet1[column_mapping_sheet1["Damages"]] = damages
-    new_row_sheet1[column_mapping_sheet1["Code"]] = code
+    new_row_sheet1[column_mapping_sheet1["Grade"]] = grade
 
     # Use the header_row from sheet2 for column mapping
     header_row_sheet2 = sheet2.row_values(1)
@@ -203,15 +238,10 @@ async def add_size(
     new_row_sheet2 = [""] * len(header_row_sheet2)
     new_row_sheet2[column_mapping_sheet2["Model"]] = shoe_name
     new_row_sheet2[column_mapping_sheet2["Sku"]] = sku
-    new_row_sheet2[column_mapping_sheet2["Capacity"]] = add_size
-    new_row_sheet2[column_mapping_sheet2["Complete"]] = complete
-    new_row_sheet2[column_mapping_sheet2["Source"]] = cur_source
-    new_row_sheet2[column_mapping_sheet2["Seller"]] = cur_seller
-    new_row_sheet2[column_mapping_sheet2["Notes"]] = cur_note
     new_row_sheet2[column_mapping_sheet2["Manufacturer"]] = manufacturer
-    new_row_sheet2[column_mapping_sheet2["Price Paid"]] = price_paid
     new_row_sheet2[column_mapping_sheet2["Damages"]] = damages
     new_row_sheet2[column_mapping_sheet2["Code"]] = code
+    new_row_sheet2[column_mapping_sheet2["Grade"]] = grade
 
     # Insert rows into both sheets
     sheet1.insert_rows([new_row_sheet1], last_row_index_sheet1 + 1)
@@ -232,7 +262,8 @@ async def add_sku(
     manufacturer: typing.Optional[str] = Query(None, title="Optional: Manufacturer"),
     cost: typing.Optional[str] = Query(None, title="Cost"),
     damages: typing.Optional[str] = Query(None, title="Damages"),
-    code: typing.Optional[str] = Query(None, title="Code")
+    code: typing.Optional[str] = Query(None, title="Code"),
+    grade: typing.Optional[str] = Query(None, title="Grade")
 ):
     add_sku = sku_to_string(add_sku)
 
@@ -250,7 +281,7 @@ async def add_sku(
     # Find the last row index in sheet2
     for index, row in enumerate(all_records_sheet2, start=2):
         # Adjust the condition according to your sheet2 structure
-        if row.get("SomeColumnInSheet2") == shoe_name:
+        if row.get("Model") == shoe_name:
             last_row_index_sheet2 = index
 
     # Use the header_row from sheet1 for column mapping
@@ -266,7 +297,7 @@ async def add_sku(
     new_row_sheet1[column_mapping_sheet1["Manufacturer"]] = manufacturer
     new_row_sheet1[column_mapping_sheet1["Price Paid"]] = cost
     new_row_sheet1[column_mapping_sheet1["Damages"]] = damages
-    new_row_sheet1[column_mapping_sheet1["Code"]] = code
+    new_row_sheet1[column_mapping_sheet1["Grade"]] = grade
 
     # Use the header_row from sheet2 for column mapping
     header_row_sheet2 = sheet2.row_values(1)
@@ -274,14 +305,10 @@ async def add_sku(
     new_row_sheet2 = [""] * len(header_row_sheet2)
     new_row_sheet2[column_mapping_sheet2["Model"]] = shoe_name
     new_row_sheet2[column_mapping_sheet2["Sku"]] = add_sku
-    new_row_sheet2[column_mapping_sheet2["Complete"]] = complete
-    new_row_sheet2[column_mapping_sheet2["Source"]] = cur_source
-    new_row_sheet2[column_mapping_sheet2["Seller"]] = cur_seller
-    new_row_sheet2[column_mapping_sheet2["Notes"]] = cur_note
     new_row_sheet2[column_mapping_sheet2["Manufacturer"]] = manufacturer
-    new_row_sheet2[column_mapping_sheet2["Price Paid"]] = cost
     new_row_sheet2[column_mapping_sheet2["Damages"]] = damages
     new_row_sheet2[column_mapping_sheet2["Code"]] = code
+    new_row_sheet2[column_mapping_sheet2["Grade"]] = grade
 
     # Insert rows into both sheets
     sheet1.insert_rows([new_row_sheet1], last_row_index_sheet1 + 1)
