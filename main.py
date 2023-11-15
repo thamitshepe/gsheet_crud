@@ -38,7 +38,7 @@ async def edit_shoe(
     new_list_price: typing.Optional[str] = Query(None, title="Optional: New List Price"),
     cost: typing.Optional[str] = Query(None, title="Optional: Cost"),
     new_condition: typing.Optional[str] = Query(None, title="Optional: New Condition"),
-    listed: typing.Optional[bool] = Query(None, title="Optional: Listed"),
+    status: typing.Optional[str] = Query(None, title="Optional: Status"),
     source: typing.Optional[str] = Query(None, title="Optional: Source"),
     seller: typing.Optional[str] = Query(None, title="Optional: Seller"),
     note: typing.Optional[str] = Query(None, title="Optional: Note"),
@@ -117,10 +117,8 @@ async def edit_shoe(
             row["List Price"] = new_list_price
         if cost is not None:
             row["Cost"] = cost
-        if listed is not True:
-            row["Listed"] = True
-        else:
-            row["Listed"] = False
+        if status is not None:
+            row["Status"] = status
         if source is not None:
             row["Source"] = source
         if seller is not None:
