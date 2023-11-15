@@ -28,42 +28,6 @@ def size_to_string(size):
 def sku_to_string(sku):
     return str(sku)
 
-def update_row(sheet, index, row):
-    range_start = f"A{index}"
-    range_end = chr(ord("A") + len(row) - 1) + str(index)
-    sheet.update(range_start + ":" + range_end, [list(row.values())], value_input_option="RAW")
-
-def add_new_row(sheet, shoe_name, add_sku, complete, cur_source, cur_seller, cur_note, date, cost, damages, code, manufacturer):
-    header_row = sheet.row_values(1)
-    column_mapping = {header: index for index, header in enumerate(header_row)}
-    new_row = [""] * len(header_row)
-    new_row[column_mapping["Model"]] = shoe_name
-    new_row[column_mapping["Sku"]] = add_sku
-    new_row[column_mapping["Complete"]] = complete
-    new_row[column_mapping["Source"]] = cur_source
-    new_row[column_mapping["Seller"]] = cur_seller
-    new_row[column_mapping["Notes"]] = cur_note
-    new_row[column_mapping["Price Paid"]] = cost
-    new_row[column_mapping["Damages"]] = damages
-    new_row[column_mapping["Manufacturer"]] = manufacturer
-    sheet.append_row(new_row)
-
-    # Use header row from the second sheet for mapping
-    header_row_sheet2 = sheet2.row_values(1)
-    column_mapping_sheet2 = {header: index for index, header in enumerate(header_row_sheet2)}
-    new_row_sheet2 = [""] * len(header_row_sheet2)
-    new_row_sheet2[column_mapping_sheet2["Model"]] = shoe_name
-    new_row_sheet2[column_mapping_sheet2["Sku"]] = add_sku
-    new_row_sheet2[column_mapping_sheet2["Complete"]] = complete
-    new_row_sheet2[column_mapping_sheet2["Source"]] = cur_source
-    new_row_sheet2[column_mapping_sheet2["Seller"]] = cur_seller
-    new_row_sheet2[column_mapping_sheet2["Notes"]] = cur_note
-    new_row_sheet2[column_mapping_sheet2["Price Paid"]] = cost
-    new_row_sheet2[column_mapping_sheet2["Damages"]] = damages
-    new_row_sheet2[column_mapping_sheet2["Code"]] = code
-    new_row_sheet2[column_mapping_sheet2["Manufacturer"]] = manufacturer
-    sheet2.append_row(new_row_sheet2)
-
 @app.post("/edit-shoe")
 async def edit_shoe(
     shoe_name: str,
@@ -81,7 +45,7 @@ async def edit_shoe(
     listed: typing.Optional[str] = Query(None, title="Optional: Listed"),
     source: typing.Optional[str] = Query(None, title="Optional: Source"),
     seller: typing.Optional[str] = Query(None, title="Optional: Seller"),
-    manufacturer: typing.Optional[str] = Query(None, title="Optional: Manufacturer"),
+    new_manufacturer: typing.Optional[str] = Query(None, title="Optional: Manufacturer"),
     note: typing.Optional[str] = Query(None, title="Optional: Note"),
     new_damages: typing.Optional[str] = Query(None, title="Optional: New Damages"),
     new_code: typing.Optional[str] = Query(None, title="Optional: New Code"),
@@ -158,8 +122,8 @@ async def edit_shoe(
             row["Listed"] = listed
         if source is not None:
             row["Source"] = source
-        if manufacturer is not None:
-            row["Manufacturer"] = manufacturer
+        if new_manufacturer is not None:
+            row["Manufacturer"] = new_manufacturer
         if seller is not None:
             row["Seller"] = seller
         if note is not None:
