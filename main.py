@@ -11,15 +11,15 @@ scopes = [
 ]
 
 # Load Google Sheets credentials for the first sheet
-creds_sheet1 = ServiceAccountCredentials.from_json_keyfile_name("secretkey_sheet1.json", scopes=scopes)
+creds_sheet1 = ServiceAccountCredentials.from_json_keyfile_name("secretkey.json", scopes=scopes)
 file_sheet1 = gspread.authorize(creds_sheet1)
-workbook_sheet1 = file_sheet1.open("Sheet1")  # Change to the actual name of your first sheet
+workbook_sheet1 = file_sheet1.open("WholeCell Inventory Template")  # Change to the actual name of your first sheet
 sheet1 = workbook_sheet1.sheet1
 
 # Load Google Sheets credentials for the second sheet
-creds_sheet2 = ServiceAccountCredentials.from_json_keyfile_name("secretkey_sheet2.json", scopes=scopes)
+creds_sheet2 = ServiceAccountCredentials.from_json_keyfile_name("secretkey.json", scopes=scopes)
 file_sheet2 = gspread.authorize(creds_sheet2)
-workbook_sheet2 = file_sheet2.open("Sheet2")  # Change to the actual name of your second sheet
+workbook_sheet2 = file_sheet2.open("product catalog template")  # Change to the actual name of your second sheet
 sheet2 = workbook_sheet2.sheet1
 
 def size_to_string(size):
@@ -33,7 +33,7 @@ def update_row(sheet, index, row):
     range_end = chr(ord("A") + len(row) - 1) + str(index)
     sheet.update(range_start + ":" + range_end, [list(row.values())], value_input_option="RAW")
 
-def add_new_row(sheet, shoe_name, add_sku, complete, cur_source, cur_seller, cur_note, date, cost):
+def add_new_row(sheet, shoe_name, add_sku, complete, cur_source, cur_seller, cur_note, date, cost, damages, code, manufacturer):
     header_row = sheet.row_values(1)
     column_mapping = {header: index for index, header in enumerate(header_row)}
     new_row = [""] * len(header_row)
@@ -44,7 +44,25 @@ def add_new_row(sheet, shoe_name, add_sku, complete, cur_source, cur_seller, cur
     new_row[column_mapping["Seller"]] = cur_seller
     new_row[column_mapping["Notes"]] = cur_note
     new_row[column_mapping["Price Paid"]] = cost
+    new_row[column_mapping["Damages"]] = damages
+    new_row[column_mapping["Manufacturer"]] = manufacturer
     sheet.append_row(new_row)
+
+    # Use header row from the second sheet for mapping
+    header_row_sheet2 = sheet2.row_values(1)
+    column_mapping_sheet2 = {header: index for index, header in enumerate(header_row_sheet2)}
+    new_row_sheet2 = [""] * len(header_row_sheet2)
+    new_row_sheet2[column_mapping_sheet2["Model"]] = shoe_name
+    new_row_sheet2[column_mapping_sheet2["Sku"]] = add_sku
+    new_row_sheet2[column_mapping_sheet2["Complete"]] = complete
+    new_row_sheet2[column_mapping_sheet2["Source"]] = cur_source
+    new_row_sheet2[column_mapping_sheet2["Seller"]] = cur_seller
+    new_row_sheet2[column_mapping_sheet2["Notes"]] = cur_note
+    new_row_sheet2[column_mapping_sheet2["Price Paid"]] = cost
+    new_row_sheet2[column_mapping_sheet2["Damages"]] = damages
+    new_row_sheet2[column_mapping_sheet2["Code"]] = code
+    new_row_sheet2[column_mapping_sheet2["Manufacturer"]] = manufacturer
+    sheet2.append_row(new_row_sheet2)
 
 @app.post("/edit-shoe")
 async def edit_shoe(
@@ -63,7 +81,10 @@ async def edit_shoe(
     listed: typing.Optional[str] = Query(None, title="Optional: Listed"),
     source: typing.Optional[str] = Query(None, title="Optional: Source"),
     seller: typing.Optional[str] = Query(None, title="Optional: Seller"),
+    manufacturer: typing.Optional[str] = Query(None, title="Optional: Manufacturer"),
     note: typing.Optional[str] = Query(None, title="Optional: Note"),
+    new_damages: typing.Optional[str] = Query(None, title="Optional: New Damages"),
+    new_code: typing.Optional[str] = Query(None, title="Optional: New Code"),
     delete: typing.Optional[bool] = Query(False, title="Optional: Delete")
 ):
 
@@ -137,10 +158,16 @@ async def edit_shoe(
             row["Listed"] = listed
         if source is not None:
             row["Source"] = source
+        if manufacturer is not None:
+            row["Manufacturer"] = manufacturer
         if seller is not None:
             row["Seller"] = seller
         if note is not None:
             row["Notes"] = note
+        if new_damages is not None:
+            row["Damages"] = new_damages
+        if new_code is not None:
+            row["Code"] = new_code
 
         update_row(sheet1, index, row)
         update_row(sheet2, index, row)
@@ -157,7 +184,10 @@ async def add_size(
     cur_seller: typing.Optional[str] = Query(None, title="Seller"),
     cur_note: typing.Optional[str] = Query(None, title="Note"),
     date: typing.Optional[str] = Query(None, title="Date"),
-    price_paid: typing.Optional[str] = Query(None, title="Price Paid")
+    manufacturer: typing.Optional[str] = Query(None, title="Optional: Manufacturer"),
+    price_paid: typing.Optional[str] = Query(None, title="Price Paid"),
+    damages: typing.Optional[str] = Query(None, title="Damages"),
+    code: typing.Optional[str] = Query(None, title="Code")
 ):
     sku = sku_to_string(sku)
     add_size = size_to_string(add_size)
@@ -180,7 +210,10 @@ async def add_size(
         new_row[column_mapping["Source"]] = cur_source
         new_row[column_mapping["Seller"]] = cur_seller
         new_row[column_mapping["Notes"]] = cur_note
+        new_row[column_mapping["Manufacturer"]] = manufacturer
         new_row[column_mapping["Price Paid"]] = price_paid
+        new_row[column_mapping["Damages"]] = damages
+        new_row[column_mapping["Code"]] = code
 
         sheet1.insert_rows([new_row], last_row_index + 1)
         sheet2.insert_rows([new_row], last_row_index + 1)
@@ -198,7 +231,10 @@ async def add_sku(
     cur_seller: typing.Optional[str] = Query(None, title="Seller"),
     cur_note: typing.Optional[str] = Query(None, title="Note"),
     date: typing.Optional[str] = Query(None, title="Date"),
-    cost: typing.Optional[str] = Query(None, title="Cost")
+    manufacturer: typing.Optional[str] = Query(None, title="Optional: Manufacturer"),
+    cost: typing.Optional[str] = Query(None, title="Cost"),
+    damages: typing.Optional[str] = Query(None, title="Damages"),
+    code: typing.Optional[str] = Query(None, title="Code")
 ):
     add_sku = sku_to_string(add_sku)
 
@@ -219,7 +255,10 @@ async def add_sku(
         new_row[column_mapping["Source"]] = cur_source
         new_row[column_mapping["Seller"]] = cur_seller
         new_row[column_mapping["Notes"]] = cur_note
+        new_row[column_mapping["Manufacturer"]] = manufacturer
         new_row[column_mapping["Price Paid"]] = cost
+        new_row[column_mapping["Damages"]] = damages
+        new_row[column_mapping["Code"]] = code
 
         sheet1.insert_rows([new_row], last_row_index + 1)
         sheet2.insert_rows([new_row], last_row_index + 1)
