@@ -152,8 +152,6 @@ async def edit_shoe(
         range_end_sheet1 = chr(ord("A") + len(row_sheet1) - 1) + str(index)
         sheet1.update(range_start_sheet1 + ":" + range_end_sheet1, [list(row_sheet1.values())], value_input_option="RAW")
 
-        # Create a new dictionary for sheet2
-        row_sheet2_updated = {}
         
         # Update logic for sheet2 using row_sheet2
         if new_shoe_name is not None:
@@ -171,8 +169,8 @@ async def edit_shoe(
 
         # Calculate the range for the specific row in the second sheet
         range_start_sheet2 = f"A{index}"
-        range_end_sheet2 = chr(ord("A") + len(row_sheet2_updated) - 1) + str(index)
-        sheet2.update(range_start_sheet2 + ":" + range_end_sheet2, [list(row_sheet2_updated.values())], value_input_option="RAW")
+        range_end_sheet2 = chr(ord("A") + len(row_sheet2) - 1) + str(index)
+        sheet2.update(range_start_sheet2 + ":" + range_end_sheet2, [list(row_sheet2.values())], value_input_option="RAW")
 
     return {"message": "Cells updated"}
 
