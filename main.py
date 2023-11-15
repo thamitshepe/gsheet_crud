@@ -83,13 +83,6 @@ async def edit_shoe(
     for index, row in enumerate(all_records_sheet2, start=2):
         # Similar logic for filtering rows in sheet2 based on shoe_name, size, and sku
         if row.get("Model") == shoe_name:
-            if size:
-                if row.get("Capacity"):
-                    size_from_sheets = size_to_string(row.get("Capacity"))
-                    if size != size_from_sheets:
-                        continue
-                else:
-                    continue
 
             if sku:
                 if row.get("Sku"):
