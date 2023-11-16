@@ -65,10 +65,7 @@ async def edit_shoe(
     header_row_sheet2 = sheet2.row_values(1)
     column_index_sheet2 = {header_row_sheet2[i]: i for i in range(len(header_row_sheet2))}
 
-    all_records_sheet1 = sheet1.get_all_records()
-    all_records_sheet2 = sheet2.get_all_records()
-
-    for index, row in enumerate(all_records_sheet1, start=2):
+    for index, row in enumerate(sheet1.get_all_records(), start=2):
         if row.get("Model") == shoe_name:
             if size:
                 if row.get("Capacity"):
@@ -93,12 +90,12 @@ async def edit_shoe(
         rows_to_delete_sheet2 = []
 
         if size:
-            rows_to_delete_sheet1 = [index for index, row in enumerate(all_records_sheet1, start=2)
+            rows_to_delete_sheet1 = [index for index, row in enumerate(sheet1.get_all_records(), start=2)
                                       if sku_to_string(row.get("Sku")) == sku and size_to_string(row.get("Capacity")) == size]
         else:
-            rows_to_delete_sheet1 = [index for index, row in enumerate(all_records_sheet1, start=2)
+            rows_to_delete_sheet1 = [index for index, row in enumerate(sheet1.get_all_records(), start=2)
                                       if sku_to_string(row.get("Sku")) == sku]
-            rows_to_delete_sheet2 = [index for index, row in enumerate(all_records_sheet2, start=2)
+            rows_to_delete_sheet2 = [index for index, row in enumerate(sheet2.get_all_records(), start=2)
                                       if sku_to_string(row.get("Sku")) == sku]
 
         if not rows_to_delete_sheet1 and not rows_to_delete_sheet2:
@@ -120,10 +117,7 @@ async def edit_shoe(
         return {"message": "Name and SKU combination not found"}
 
     for index, row in rows_to_update:
-        # Create separate lists for each sheet
-        row_sheet1 = list(row.values())
-        row_sheet2 = list(row.values())
-
+        
         # Update logic for sheet1
         if new_size is not None:
             row[column_index_sheet1.get("Capacity")] = new_size
@@ -156,14 +150,10 @@ async def edit_shoe(
         if new_damages is not None:
             row[column_index_sheet1.get("Damages")] = new_damages
 
-        # Calculate the range for the specific row in the first sheet
+        # Calculate the range for the specific row in sheet1
         range_start_sheet1 = f"A{index}"
-        range_end_sheet1 = chr(ord("A") + len(row_sheet1) - 1) + str(index)
-
-        try:
-            sheet1.update(range_start_sheet1 + ":" + range_end_sheet1, [row_sheet1], value_input_option="RAW")
-        except Exception as e:
-            return {"error": f"Error updating sheet1: {str(e)}"}
+        range_end_sheet1 = chr(ord("A") + len(row) - 1) + str(index)
+        sheet1.update(range_start_sheet1 + ":" + range_end_sheet1, [list(row.values())], value_input_option="RAW")
 
         # Update logic for sheet2
         if new_size is not None:
@@ -181,14 +171,10 @@ async def edit_shoe(
         if new_code is not None:
             row[column_index_sheet2.get("Code")] = new_code
 
-        # Calculate the range for the specific row in the second sheet
+        # Calculate the range for the specific row in sheet2
         range_start_sheet2 = f"A{index}"
-        range_end_sheet2 = chr(ord("A") + len(row_sheet2) - 1) + str(index)
-
-        try:
-            sheet2.update(range_start_sheet2 + ":" + range_end_sheet2, [row_sheet2], value_input_option="RAW")
-        except Exception as e:
-            return {"error": f"Error updating sheet2: {str(e)}"}
+        range_end_sheet2 = chr(ord("A") + len(row) - 1) + str(index)
+        sheet2.update(range_start_sheet2 + ":" + range_end_sheet2, [list(row.values())], value_input_option="RAW")
 
     return {"message": "Cells updated"}
 
