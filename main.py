@@ -58,11 +58,21 @@ async def edit_shoe(
 
     # Fetch the header row for sheet1
     header_row_sheet1 = sheet1.row_values(1)
-    column_index_sheet1 = {header_row_sheet1[i]: i for i in range(len(header_row_sheet1))}
 
     # Fetch the header row for sheet2
     header_row_sheet2 = sheet2.row_values(1)
-    column_index_sheet2 = {header_row_sheet2[i]: i for i in range(len(header_row_sheet2))}
+
+    # Find the column indices for sheet1
+    column_index_sheet1 = {}
+    for key in header_row_sheet1:
+        cell = sheet1.find(key)
+        column_index_sheet1[key] = cell.col
+
+    # Find the column indices for sheet2
+    column_index_sheet2 = {}
+    for key in header_row_sheet2:
+        cell = sheet2.find(key)
+        column_index_sheet2[key] = cell.col
 
     for index, row in enumerate(sheet1.get_all_records(), start=2):
         if row.get("Model") == shoe_name:
