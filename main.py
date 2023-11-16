@@ -63,61 +63,30 @@ async def edit_shoe(
     header_row_sheet2 = sheet2.row_values(1)
 
     # Find the column indices for sheet1
-    column_index_sheet1 = {}
-    for key in header_row_sheet1:
-        cell = sheet1.find(key)
-        column_index_sheet1[key] = cell.col
+    column_index_sheet1 = {key: idx + 1 for idx, key in enumerate(header_row_sheet1)}
 
     # Find the column indices for sheet2
-    column_index_sheet2 = {}
-    for key in header_row_sheet2:
-        cell = sheet2.find(key)
-        column_index_sheet2[key] = cell.col
+    column_index_sheet2 = {key: idx + 1 for idx, key in enumerate(header_row_sheet2)}
 
     for index, row in enumerate(sheet1.get_all_records(), start=2):
-        if row.get("Model") == shoe_name:
-            if size:
-                if row.get("Capacity"):
-                    size_from_sheets = size_to_string(row.get("Capacity"))
-                    if size != size_from_sheets:
-                        continue
-                else:
-                    continue
-
-            if sku:
-                if row.get("Sku"):
-                    sku_from_sheets = sku_to_string(row.get("Sku"))
-                    if sku != sku_from_sheets:
-                        continue
-                else:
-                    continue
-
+        if row.get("Model") == shoe_name and (not size or size_to_string(row.get("Capacity")) == size) and sku_to_string(row.get("Sku")) == sku:
             rows_to_update.append((index, row))
 
     if delete:
-        rows_to_delete_sheet1 = []
-        rows_to_delete_sheet2 = []
-
-        if size:
-            rows_to_delete_sheet1 = [index for index, row in enumerate(sheet1.get_all_records(), start=2)
-                                      if sku_to_string(row.get("Sku")) == sku and size_to_string(row.get("Capacity")) == size]
-        else:
-            rows_to_delete_sheet1 = [index for index, row in enumerate(sheet1.get_all_records(), start=2)
-                                      if sku_to_string(row.get("Sku")) == sku]
-            rows_to_delete_sheet2 = [index for index, row in enumerate(sheet2.get_all_records(), start=2)
-                                      if sku_to_string(row.get("Sku")) == sku]
+        rows_to_delete_sheet1 = [index for index, row in enumerate(sheet1.get_all_records(), start=2)
+                                  if sku_to_string(row.get("Sku")) == sku and (not size or size_to_string(row.get("Capacity")) == size)]
+        rows_to_delete_sheet2 = [index for index, row in enumerate(sheet2.get_all_records(), start=2)
+                                  if sku_to_string(row.get("Sku")) == sku]
 
         if not rows_to_delete_sheet1 and not rows_to_delete_sheet2:
             return {"message": "No rows found for deletion"}
 
         # Deleting rows from sheet1
-        rows_to_delete_sheet1.sort(reverse=True)
-        for index in rows_to_delete_sheet1:
+        for index in reversed(rows_to_delete_sheet1):
             sheet1.delete_rows(index)
 
         # Deleting rows from sheet2
-        rows_to_delete_sheet2.sort(reverse=True)
-        for index in rows_to_delete_sheet2:
+        for index in reversed(rows_to_delete_sheet2):
             sheet2.delete_rows(index)
 
         return {"message": f"{len(rows_to_delete_sheet1) + len(rows_to_delete_sheet2)} rows deleted"}
@@ -173,6 +142,7 @@ async def edit_shoe(
             sheet2.update_cell(index, column_index_sheet2.get("Damages"), new_damages)
 
     return {"message": "Cells updated"}
+
 
 @app.post("/add-size")
 async def add_size(
