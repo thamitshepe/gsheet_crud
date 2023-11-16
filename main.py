@@ -40,7 +40,7 @@ async def edit_shoe(
     new_price_paid: typing.Optional[str] = Query(None, title="Optional: New Cost"),
     new_quantity: typing.Optional[str] = Query(None, title="Optional: New Quantity"),
     new_list_price: typing.Optional[str] = Query(None, title="Optional: New List Price"),
-    cost: typing.Optional[str] = Query(None, title="Optional: Cost"),
+    new_cost: typing.Optional[str] = Query(None, title="Optional: Cost"),
     new_condition: typing.Optional[str] = Query(None, title="Optional: New Condition"),
     status: typing.Optional[str] = Query(None, title="Optional: Status"),
     listed: typing.Optional[str] = Query(None, title="Optional: Listed"),
@@ -141,8 +141,8 @@ async def edit_shoe(
             sheet1.update_cell(index, column_index_sheet1.get("Grade"), new_condition)
         if new_list_price is not None:
             sheet1.update_cell(index, column_index_sheet1.get("List Price"), new_list_price)
-        if cost is not None:
-            sheet1.update_cell(index, column_index_sheet1.get("Cost"), cost)
+        if new_cost is not None:
+            sheet1.update_cell(index, column_index_sheet1.get("Cost"), new_cost)
         if status is not None:
             sheet1.update_cell(index, column_index_sheet1.get("Status"), status)
         if listed is not None:
@@ -253,7 +253,7 @@ async def add_sku(
     cur_note: typing.Optional[str] = Query(None, title="Note"),
     date: typing.Optional[str] = Query(None, title="Date"),
     manufacturer: typing.Optional[str] = Query(None, title="Optional: Manufacturer"),
-    cost: typing.Optional[str] = Query(None, title="Cost"),
+    price_paid: typing.Optional[str] = Query(None, title="Price Paid"),
     damages: typing.Optional[str] = Query(None, title="Damages"),
     grade: typing.Optional[str] = Query(None, title="Grade")
 ):
@@ -287,7 +287,7 @@ async def add_sku(
     new_row_sheet1[column_mapping_sheet1["Seller"]] = cur_seller
     new_row_sheet1[column_mapping_sheet1["Notes"]] = cur_note
     new_row_sheet1[column_mapping_sheet1["Manufacturer"]] = manufacturer
-    new_row_sheet1[column_mapping_sheet1["Price Paid"]] = cost
+    new_row_sheet1[column_mapping_sheet1["Price Paid"]] = price_paid
     new_row_sheet1[column_mapping_sheet1["Damages"]] = damages
     new_row_sheet1[column_mapping_sheet1["Grade"]] = grade
 
