@@ -49,7 +49,6 @@ async def edit_shoe(
     new_manufacturer: typing.Optional[str] = Query(None, title="Optional: Manufacturer"),
     note: typing.Optional[str] = Query(None, title="Optional: Note"),
     new_damages: typing.Optional[str] = Query(None, title="Optional: New Damages"),
-    new_code: typing.Optional[str] = Query(None, title="Optional: New Code"),
     delete: typing.Optional[bool] = Query(False, title="Optional: Delete")
 ):
 
@@ -117,64 +116,51 @@ async def edit_shoe(
         return {"message": "Name and SKU combination not found"}
 
     for index, row in rows_to_update:
-        
         # Update logic for sheet1
         if new_size is not None:
-            row[column_index_sheet1.get("Capacity")] = new_size
+            sheet1.update_cell(index, column_index_sheet1.get("Capacity"), new_size)
         if new_shoe_name is not None:
-            row[column_index_sheet1.get("Model")] = new_shoe_name
+            sheet1.update_cell(index, column_index_sheet1.get("Model"), new_shoe_name)
         if new_sku is not None:
-            row[column_index_sheet1.get("Sku")] = sku_to_string(new_sku)
+            sheet1.update_cell(index, column_index_sheet1.get("Sku"), sku_to_string(new_sku))
         if new_price_paid is not None:
-            row[column_index_sheet1.get("Price Paid")] = new_price_paid
+            sheet1.update_cell(index, column_index_sheet1.get("Price Paid"), new_price_paid)
         if new_quantity is not None:
-            row[column_index_sheet1.get("Quantity")] = new_quantity
+            sheet1.update_cell(index, column_index_sheet1.get("Quantity"), new_quantity)
         if new_condition is not None:
-            row[column_index_sheet1.get("Grade")] = new_condition
+            sheet1.update_cell(index, column_index_sheet1.get("Grade"), new_condition)
         if new_list_price is not None:
-            row[column_index_sheet1.get("List Price")] = new_list_price
+            sheet1.update_cell(index, column_index_sheet1.get("List Price"), new_list_price)
         if cost is not None:
-            row[column_index_sheet1.get("Cost")] = cost
+            sheet1.update_cell(index, column_index_sheet1.get("Cost"), cost)
         if status is not None:
-            row[column_index_sheet1.get("Status")] = status
+            sheet1.update_cell(index, column_index_sheet1.get("Status"), status)
         if listed is not None:
-            row[column_index_sheet1.get("Listed")] = listed
+            sheet1.update_cell(index, column_index_sheet1.get("Listed"), listed)
         if source is not None:
-            row[column_index_sheet1.get("Source")] = source
+            sheet1.update_cell(index, column_index_sheet1.get("Source"), source)
         if new_manufacturer is not None:
-            row[column_index_sheet1.get("Manufacturer")] = new_manufacturer
+            sheet1.update_cell(index, column_index_sheet1.get("Manufacturer"), new_manufacturer)
         if seller is not None:
-            row[column_index_sheet1.get("Seller")] = seller
+            sheet1.update_cell(index, column_index_sheet1.get("Seller"), seller)
         if note is not None:
-            row[column_index_sheet1.get("Notes")] = note
+            sheet1.update_cell(index, column_index_sheet1.get("Notes"), note)
         if new_damages is not None:
-            row[column_index_sheet1.get("Damages")] = new_damages
-
-        # Calculate the range for the specific row in sheet1
-        range_start_sheet1 = f"A{index}"
-        range_end_sheet1 = chr(ord("A") + len(row) - 1) + str(index)
-        sheet1.update(range_start_sheet1 + ":" + range_end_sheet1, [list(row.values())], value_input_option="RAW")
+            sheet1.update_cell(index, column_index_sheet1.get("Damages"), new_damages)
 
         # Update logic for sheet2
         if new_size is not None:
-            row[column_index_sheet2.get("Capacity")] = new_size
+            sheet2.update_cell(index, column_index_sheet2.get("Capacity"), new_size)
         if new_shoe_name is not None:
-            row[column_index_sheet2.get("Model")] = new_shoe_name
+            sheet2.update_cell(index, column_index_sheet2.get("Model"), new_shoe_name)
         if new_sku is not None:
-            row[column_index_sheet2.get("Sku")] = sku_to_string(new_sku)
+            sheet2.update_cell(index, column_index_sheet2.get("Sku"), sku_to_string(new_sku))
         if new_condition is not None:
-            row[column_index_sheet2.get("Grade")] = new_condition
+            sheet2.update_cell(index, column_index_sheet2.get("Grade"), new_condition)
         if new_manufacturer is not None:
-            row[column_index_sheet2.get("Manufacturer")] = new_manufacturer
+            sheet2.update_cell(index, column_index_sheet2.get("Manufacturer"), new_manufacturer)
         if new_damages is not None:
-            row[column_index_sheet2.get("Damages")] = new_damages
-        if new_code is not None:
-            row[column_index_sheet2.get("Code")] = new_code
-
-        # Calculate the range for the specific row in sheet2
-        range_start_sheet2 = f"A{index}"
-        range_end_sheet2 = chr(ord("A") + len(row) - 1) + str(index)
-        sheet2.update(range_start_sheet2 + ":" + range_end_sheet2, [list(row.values())], value_input_option="RAW")
+            sheet2.update_cell(index, column_index_sheet2.get("Damages"), new_damages)
 
     return {"message": "Cells updated"}
 
