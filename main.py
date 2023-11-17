@@ -76,7 +76,7 @@ async def edit_shoe(
         rows_to_delete_sheet1 = [index for index, row in enumerate(sheet1.get_all_records(), start=2)
                                   if sku_to_string(row.get("Sku")) == sku and (not size or size_to_string(row.get("Capacity")) == size)]
         rows_to_delete_sheet2 = [index for index, row in enumerate(sheet2.get_all_records(), start=2)
-                                  if sku_to_string(row.get("Sku")) == sku]
+                                  if sku_to_string(row.get("Sku")) == sku and (not size or size_to_string(row.get("Capacity")) == size)]
 
         if not rows_to_delete_sheet1 and not rows_to_delete_sheet2:
             return {"message": "No rows found for deletion"}
