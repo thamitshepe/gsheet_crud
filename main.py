@@ -201,10 +201,10 @@ async def add_size(
     new_row_sheet2 = [""] * len(header_row_sheet2)
     new_row_sheet2[column_mapping_sheet2["Model"]] = shoe_name
     new_row_sheet2[column_mapping_sheet2["Sku"]] = sku
+    new_row_sheet2[column_mapping_sheet2["Capacity"]] = add_size
     new_row_sheet2[column_mapping_sheet2["Manufacturer"]] = manufacturer
     new_row_sheet2[column_mapping_sheet2["Damages"]] = damages
     new_row_sheet2[column_mapping_sheet2["Grade"]] = grade
-    new_row_sheet2[column_mapping_sheet2["Capacity"]] = size
 
     # Insert rows into both sheets
     sheet1.insert_rows([new_row_sheet1], last_row_index_sheet1 + 1)
